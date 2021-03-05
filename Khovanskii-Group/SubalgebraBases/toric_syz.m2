@@ -189,7 +189,7 @@ autoreduce(Subring, Matrix) := (subR, idealGens) -> (
     );
 
 -- Perform autosubduction on the generators of a subring:
--- I.e., reduce g\in G modulo G-g for all g\in G.   
+-- I.e., reduce g\in G modulo G-g for all g\in G.
 autosubduce = method(TypicalValue => Matrix)
 autosubduce(Matrix) := G -> (
     noDupes := new MutableList from first entries G;        
@@ -202,7 +202,7 @@ autosubduce(Matrix) := G -> (
 	    notS = subring notS;
 	    );
 	      
-	answer := notS#"PresRing"#"FullSub"(subduction(notS, s));
+	answer := notS#"presentation"#"fullSubstitution"(subduction(notS, s));
     	if(answer != 0) then ( 
 	    answer = answer*(1/leadCoef(answer));
 	    );

@@ -104,7 +104,7 @@ sagbi(List) := o -> L -> (
 
 -- PrintLevel > 0: Print some information each loop, but don't print any polynomials.
 -- PrintLevel > 1: Print new Sagbi gens.
-sagbi(SagbiBasis) := o -> S -> (
+sagbi(SAGBIBasis) := o -> S -> (
     
     compTable := new MutableHashTable from S;
     
