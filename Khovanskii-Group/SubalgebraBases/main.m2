@@ -99,14 +99,20 @@ sagbi(List) := o -> L -> (
     sagbi(o, subring L)
     );
 
+
+
+
 -- PrintLevel > 0: Print some information each loop, but don't print any polynomials.
 -- PrintLevel > 1: Print new Sagbi gens.
-sagbi(Subring) := o -> R -> (
+sagbi(SagbiBasis) := o -> S -> (
+    
+    compTable := new MutableHashTable from S;
+    
     if o.Autosubduce then(
 	if o.PrintLevel > 0 then (
 	    print("Performing initial autosubduction...");
 	    );
-    	R = autosubduce R;
+    	compTable#"subringGenerators" = autosubduce compTable#"subringGenerators";
     	);
 
     R.cache.SubalgComputations = new MutableHashTable;
