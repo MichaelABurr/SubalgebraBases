@@ -31,7 +31,7 @@ lowestDegree = (compTable) -> (
     -- R is of Type Subring
     -- newGens is a 1-row matrix of generators to be added
 appendToBasis = (compTable, newGens) -> (
-    compTable#"sagbiDegrees" = compTable#"sagbiDegrees" | flatten degrees source newGens;
+    compTable#"sagbiDegrees" = compTable#"sagbiDegrees" | matrix{flatten degrees source newGens};
     compTable#"sagbiGenerators" = compTable#"sagbiGenerators" | newGens;
     )
 
@@ -75,6 +75,7 @@ processPending = (compTable) -> (
             remove(compTable#"pending", currentLowest);
 	    );
     	);
+    compTable#"presentation" = makePresRing(compTable#"ambientRing", compTable#"sagbiGenerators");
     currentLowest
     )
 
