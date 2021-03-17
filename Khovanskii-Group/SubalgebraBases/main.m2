@@ -105,8 +105,11 @@ sagbi(List) := o -> L -> (
 -- PrintLevel > 0: Print some information each loop, but don't print any polynomials.
 -- PrintLevel > 1: Print new Sagbi gens.
 sagbi(SAGBIBasis) := o -> S -> (
+    if S#"sagbiDone" then return S;
     
     compTable := new MutableHashTable from S;
+    compTable#"pending" = new MutableHashTable from compTable#"pending";
+    compTable#"stoppingData" = new MutableHashTable from compTable#"stoppingData";
     
     if o.Autosubduce then(
 	if o.PrintLevel > 0 then (
@@ -114,39 +117,29 @@ sagbi(SAGBIBasis) := o -> S -> (
 	    );
     	compTable#"subringGenerators" = autosubduce compTable#"subringGenerators";
     	);
+    
+    if #compTable#"pending" == 0 then (
+    	insertPending(compTable, compTable#"subringGenerators");
+    	);
 
-    R.cache.SubalgComputations = new MutableHashTable;
-    subalgComp := R.cache.SubalgComputations;
-    
-    R.cache.SagbiDegrees = {};
-    subalgComp#"sagbiGB" = null;
-    
-    currDegree := null;
-    nLoops := null;
-    R.cache.SagbiDone = false;
-    syzygyPairs := null;
-    
-    subalgComp#"Pending" = new MutableList from toList(o.Limit+1:{});
-    R.cache.SagbiGens = matrix(ambient R,{{}});
-
-    maxGensDeg := (max degrees source gens R)_0;
-    reducedGens := compress submatBelowDegree(gens R, o.Limit+1);
-    insertPending(R, reducedGens, o.Limit);
     -- Remove elements of coefficient ring
-    (subalgComp#"Pending")#0 = {};
-    processPending(R, o.Limit);
-
-    currDegree = subalgComp#"CurrentLowest"+1;
-    isPartial := false;
+    remove(compTable#"pending", 0);
     
-    while currDegree <= o.Limit and not R.cache.SagbiDone do (  	
+    compTable#"stoppingData"#"degree" = processPending(compTable) + 1;
+    compTable
+   
+    while compTable#"stoppingData"#"degree" <= o.Limit and not compTable#"sagbiDone" do (  	
 	if o.PrintLevel > 0 then (
 	    print("---------------------------------------");
-	    print("-- Current degree:"|toString(currDegree));
+	    print("-- Current degree:"|toString(compTable#"stoppingData"#"degree"));
 	    print("---------------------------------------");
-	    );	
-	partialSagbi := subalgComp#"PartialSagbi";
-	pres := partialSagbi#"PresRing";
+	    );
+     
+	--partialSagbi := subalgComp#"PartialSagbi";
+	--pres := partialSagbi#"PresRing";
+	
+	--this is where we are as of 12/3/21
+	
     	if o.PrintLevel > 0 then (
     	    print("-- Computing the kernel of the substitution homomorphism to the initial algebra...");
 	    );
