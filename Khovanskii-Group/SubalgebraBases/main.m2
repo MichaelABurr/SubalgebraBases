@@ -99,8 +99,12 @@ sagbi(List) := o -> L -> (
     sagbi(o, subring L)
     );
 
+sagbi(Subring) := o -> S -> (
+    sagbi(o, sagbiBasis S)
+    );
 
 
+-- sagbi(Subring) := o -> S -> sagbi(o,sagbiBasis S);
 
 -- PrintLevel > 0: Print some information each loop, but don't print any polynomials.
 -- PrintLevel > 1: Print new Sagbi gens.
@@ -127,6 +131,10 @@ sagbi(SAGBIBasis) := o -> S -> (
     
     compTable#"stoppingData"#"degree" = processPending(compTable) + 1;
     compTable
+
+)
+
+end--
    
     while compTable#"stoppingData"#"degree" <= o.Limit and not compTable#"sagbiDone" do (  	
 	if o.PrintLevel > 0 then (
