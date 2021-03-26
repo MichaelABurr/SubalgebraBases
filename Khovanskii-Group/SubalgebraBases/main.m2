@@ -138,11 +138,6 @@ sagbi(SAGBIBasis) := o -> S -> (
     remove(compTable#"pending", 0);
     
     compTable#"stoppingData"#"degree" = processPending(compTable) + 1;
-    compTable
-
-)
-
-end--
    
     while compTable#"stoppingData"#"degree" <= o.Limit and not compTable#"sagbiDone" do (  	
 	if o.PrintLevel > 0 then (
@@ -151,22 +146,27 @@ end--
 	    print("---------------------------------------");
 	    );
      
-	--partialSagbi := subalgComp#"PartialSagbi";
-	--pres := partialSagbi#"PresRing";
-	
-	--this is where we are as of 12/3/21
+	pres := makePresRing(compTable#"ambientRing", compTable#"sagbiGenerators");
 	
     	if o.PrintLevel > 0 then (
     	    print("-- Computing the kernel of the substitution homomorphism to the initial algebra...");
 	    );
-	partialSagbi.cache#"SyzygyIdealGB" = gb(pres#"SyzygyIdeal", DegreeLimit => currDegree);
-	sagbiGB := partialSagbi.cache#"SyzygyIdealGB"; 
-	zeroGens := submatByDegree(mingens ideal selectInSubring(1, gens sagbiGB), currDegree);
-	syzygyPairs = pres#"Substitution"(zeroGens);
+	sagbiGB = gb(pres#"syzygyIdeal", DegreeLimit => compTable#"stoppingData"#"degree"); 
+	zeroGens := submatByDegree(mingens ideal selectInSubring(1, gens sagbiGB), compTable#"stoppingData"#"degree");
+	syzygyPairs = pres#"substitution"(zeroGens);
+	
+	break; 
+	);
+    	(compTable, sagbiGB, zeroGens, syzygyPairs)
+	);
+    	
+	--this is where we are as of 3/26/21
+	
+    	end--
 	
 	-- Have we previously found any syzygies of degree currDegree?
-        if subalgComp#"Pending"#currDegree != {} then (
-            syzygyPairs = syzygyPairs | pres#"InclusionBase"(matrix{subalgComp#"Pending"#currDegree});
+        if subalgComp#"pending"#(compTable#"stoppingData"#"degree") != {} then (
+            syzygyPairs = syzygyPairs | pres#"inclusionAmbient"(matrix{subalgComp#"pending"#(compTable#"stoppingData"#"degree")});
             subalgComp#"Pending"#currDegree = {};
             );
 	
