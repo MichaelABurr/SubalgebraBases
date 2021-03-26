@@ -14,12 +14,15 @@ export {
 
 -- Performs subduction using the generators of subR.
 -- currently does not require the generators to be a Sagbi basis.
+
+-- Perhaps make this so that you can give it a matrix instead of a subring?
+-- If we were to do this, check that the output is used consistently
 subduction = method(TypicalValue => RingElement)
 subduction(Subring, RingElement) := (subR, f) -> (
-    pres := subR#"PresRing";
-    tense := pres#"TensorRing";
+    pres := subR#"presentation";
+    tense := pres#"tensorRing";
     if ring f === tense then (
-	f = (pres#"FullSub")(f);
+	f = (pres#"fullSubstitution")(f);
 	)else if ring f =!= ambient subR then (
 	error "f must be from the (ambient subR) or subR's TensorRing.";
 	);
@@ -30,14 +33,19 @@ subduction(Subring, RingElement) := (subR, f) -> (
     -- (This is done because otherwise there is potential for a segfault.)
     throwError := f - 1_(ambient subR);   
     
+    -- We no longer store a groebner basis each time
+    -- Will this be expensive to recompute a groebner basis each time?
+    -*
     if not subR.cache#?"SyzygyIdealGB" then (
 	subR.cache#"SyzygyIdealGB" = gb (pres#"SyzygyIdeal");
 	);
     J := subR.cache#"SyzygyIdealGB";
+    *-
+    J := gb (pres#"syzygyIdeal");
         
-    F := pres#"Substitution";
+    F := pres#"substitution";
     numblocks := rawMonoidNumberOfBlocks raw monoid ambient subR;
-    fMat := matrix({{pres#"InclusionBase"(f)}});    
+    fMat := matrix({{pres#"inclusionAmbient"(f)}});    
     result := rawSubduction(numblocks, raw fMat, raw F, raw J);
     result = promote(result_(0,0), tense);    
     
@@ -120,7 +128,7 @@ sagbi(SAGBIBasis) := o -> S -> (
 	    print("Performing initial autosubduction...");
 	    );
     	compTable#"subringGenerators" = autosubduce compTable#"subringGenerators";
-    	);
+    );
     
     if #compTable#"pending" == 0 then (
     	insertPending(compTable, compTable#"subringGenerators");
