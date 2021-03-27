@@ -200,7 +200,7 @@ autosubduce(Matrix) := G -> (
     	notS := compress submatrix'(matrix({toList noDupes}),,{i});
 	if zero notS then return Matrix {{s}};
 	
-	subringNotS = subring notS;
+    subringNotS := subring notS;
 	answer := subringNotS#"presentation"#"fullSubstitution"(subduction(subringNotS, s));
     	if(answer != 0) then ( 
 	    answer = answer*(1/leadCoef(answer));

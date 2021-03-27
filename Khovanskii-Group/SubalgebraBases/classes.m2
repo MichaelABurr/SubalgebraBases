@@ -27,8 +27,9 @@ export {
 
 Subring = new Type of HashTable
 
-subring = method(Options => true)
-subring Matrix := {} >> opts -> M -> (
+-- Make options => true
+subring = method(Options => {VarBaseName => "p"})
+subring Matrix := {VarBaseName => "p"} >> opts -> M -> (
     new Subring from{
         "ambientRing" => ring M,
         "generators" => M,
@@ -37,7 +38,7 @@ subring Matrix := {} >> opts -> M -> (
         cache => new CacheTable from {}
     }
 )
-subring List := {} >> opts -> L -> subring(opts, matrix{L})
+subring List := {VarBaseName => "p"} >> opts -> L -> subring(opts, matrix{L})
 
 -- Subring access functions
 
@@ -207,6 +208,64 @@ makePresRing(Subring) := opts -> subR -> (
     subR#"PresRing"
 );
 
+-- Old things, to be edited.
+
+-- f % Subring is never going to be an element of the subalgebra, hence the ouput
+-- is in the lower variables of TensorRing.
+-- input: f in ambient A or TensorRing of A.
+-- output: r in TensorRing of A such that f = a + r w/ a in A, r "minimal"
+RingElement % Subring := (f, A) -> (
+    pres := A#"PresRing";
+    if ring f === ambient A then(
+	f = (pres#"InclusionBase")(f);
+	) else if ring f =!= pres#"TensorRing" then(
+	error "The RingElement f must be in either TensorRing or ambient A.";
+	);
+    ans := (subduction(A, f));
+    ans
+    );
+
+-- f // Subring is always going to be inside of the subalgebra, hence the output
+-- should be in the upper variables of TensorRing.
+-- NOTE: If you want to compute FullSub(f//A), it is a lot faster to compute f-(f%A).
+-- input: f in ambient A or TensorRing of A.
+-- output: a in TensorRing of A such that f = a + r w/ a in A, r "minimal."
+RingElement // Subring := (f, A) -> (
+    pres := A#"PresRing";
+    tense := pres#"TensorRing";
+    if ring f === ambient A then(
+	f = (pres#"InclusionBase")(f);
+	) else if ring f =!= tense then(
+	error "The RingElement f must be in either the TensorRing or ambient ring of A.";
+	);
+    result := f - (f % A);
+    I := pres#"LiftedPres";
+    result % I
+    );
+
+-- Sends each entry e to e%A
+Matrix % Subring := (M, A) -> (
+    pres := A#"PresRing";
+    ents := for i from 0 to numrows M - 1 list(
+	for j from 0 to numcols M - 1 list(M_(i,j) % A)
+	);
+    matrix(pres#"TensorRing", ents)
+    );
+
+-- Sends each entry e to e//A
+Matrix // Subring := (M, A) -> (
+    pres := A#"PresRing";
+    ents := for i from 0 to numrows M - 1 list(
+	for j from 0 to numcols M - 1 list(M_(i,j) // A)
+	);
+    matrix(pres#"TensorRing", ents)
+    );
+
+-- Returns the tensor ring because the function ambient returns the ambient ring.
+ring Subring := A -> (
+A#"PresRing"#"TensorRing"
+);
+
 end---Michael
 
 end-- Old classes.m2
@@ -358,62 +417,6 @@ makePresRing(Ring, List) := opts -> (R, gensR) ->(
 -- constructing a new instance. Don't use makePresRing when you can use the function subring.   
 makePresRing(Subring) := opts -> subR -> (
     subR#"PresRing"
-    );
-
--- Returns the tensor ring because the function ambient returns the ambient ring.
-ring Subring := A -> (
-    A#"PresRing"#"TensorRing"
-    );
-
--- f % Subring is never going to be an element of the subalgebra, hence the ouput
--- is in the lower variables of TensorRing.
--- input: f in ambient A or TensorRing of A. 
--- output: r in TensorRing of A such that f = a + r w/ a in A, r "minimal"
-RingElement % Subring := (f, A) -> (
-    pres := A#"PresRing";
-    if ring f === ambient A then(
-	f = (pres#"InclusionBase")(f);
-	) else if ring f =!= pres#"TensorRing" then(
-	error "The RingElement f must be in either TensorRing or ambient A.";
-	);
-    ans := (subduction(A, f));
-    ans
-    );
-
--- f // Subring is always going to be inside of the subalgebra, hence the output
--- should be in the upper variables of TensorRing. 
--- NOTE: If you want to compute FullSub(f//A), it is a lot faster to compute f-(f%A).
--- input: f in ambient A or TensorRing of A. 
--- output: a in TensorRing of A such that f = a + r w/ a in A, r "minimal."
-RingElement // Subring := (f, A) -> (
-    pres := A#"PresRing";
-    tense := pres#"TensorRing";
-    if ring f === ambient A then(
-	f = (pres#"InclusionBase")(f);
-	) else if ring f =!= tense then(
-	error "The RingElement f must be in either the TensorRing or ambient ring of A.";
-	);
-    result := f - (f % A);
-    I := pres#"LiftedPres";
-    result % I
-    );
-
--- Sends each entry e to e%A
-Matrix % Subring := (M, A) -> (
-    pres := A#"PresRing";
-    ents := for i from 0 to numrows M - 1 list(
-	for j from 0 to numcols M - 1 list(M_(i,j) % A)
-	);
-    matrix(pres#"TensorRing", ents)
-    );
-
--- Sends each entry e to e//A
-Matrix // Subring := (M, A) -> (
-    pres := A#"PresRing";
-    ents := for i from 0 to numrows M - 1 list(
-	for j from 0 to numcols M - 1 list(M_(i,j) // A)
-	);
-    matrix(pres#"TensorRing", ents)
     );
 
 end--

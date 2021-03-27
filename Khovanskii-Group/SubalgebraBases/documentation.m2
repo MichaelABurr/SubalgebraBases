@@ -542,14 +542,14 @@ doc ///
        the function @TO "intrinsicReduce"@.
 
    SeeAlso
-     (autosubduce, Subring)
+     (autosubduce, Matrix)
 ///
 
 
 doc ///
    Key
      autosubduce
-     (autosubduce, Subring)
+     (autosubduce, Matrix)
    Headline
      Performs autosubduction on the generators of a subring.
    Usage
