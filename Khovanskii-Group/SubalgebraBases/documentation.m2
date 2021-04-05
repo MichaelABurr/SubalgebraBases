@@ -525,7 +525,7 @@ doc ///
    Headline
      Perform autoreduction of the generators of an ideal of a subring.
    Usage
-     result = subduction(subR, idealGens)
+     result = internalSubduction(PresRing, idealGens)
    Inputs
      subR:Subring
        A subring instance that is a sagbi basis.
@@ -553,7 +553,7 @@ doc ///
    Headline
      Performs autosubduction on the generators of a subring.
    Usage
-     result = subduction(subR)
+     result = internalSubduction(pres)
    Inputs
      subR:Subring
     	A subring that need not be a sagbi basis. 
@@ -566,7 +566,7 @@ doc ///
        
    SeeAlso
      (autoreduce, Subring, Matrix)
-     (subduction, Subring, RingElement)
+     (internalSubduction, PresRing, RingElement)
 ///
 
 doc ///
@@ -1019,9 +1019,9 @@ doc ///
 
 doc ///
    Key
-     subduction
-     (subduction, Subring, RingElement)
-     (subduction, Subring, Matrix)
+     internalSubduction
+     (internalSubduction, PresRing, RingElement)
+     (internalSubduction, PresRing, Matrix)
      (symbol %, Matrix, Subring)
    Headline
      Performs subduction relative to the generators of a subring.
@@ -1036,8 +1036,8 @@ doc ///
        An element of the tensor ring of subR
      resultMat:Matrix
    Usage 
-     result = subduction(subR, f)
-     resultMat = subduction(subR, M)
+     result = internalSubduction(pres, f)
+     resultMat = internalSubduction(pres, M)
    Description
      Text
        If the second argument is a one-row matrix, subduction is performed on each entry 
@@ -1055,11 +1055,11 @@ doc ///
      Example
        gndR = QQ[symbol t_1, symbol t_2, symbol t_3];
        G = matrix {{t_1^4*t_2^4*t_3^4, (t_1^8)*t_2*t_3^8}}
-       subR = subring(G) 
-       subduction(subR, G_(0,0))
-       subduction(subR, G_(0,0)*G_(0,1) + t_1)
-       f = subduction(subR, t_1)
-       (subR#"PresRing"#"ProjectionBase")(f)
+       pres = makePresRing(gndR,G);
+       internalSubduction(pres, G_(0,0))
+       internalSubduction(pres, G_(0,0)*G_(0,1) + t_1)
+       f = internalSubduction(pres, t_1)
+       (pres#"ProjectionBase")(f)
 ///
 
 

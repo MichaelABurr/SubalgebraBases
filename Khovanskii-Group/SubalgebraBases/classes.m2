@@ -29,7 +29,7 @@ Subring = new Type of HashTable
 
 -- Make options => true
 subring = method(Options => {VarBaseName => "p"})
-subring Matrix := {VarBaseName => "p"} >> opts -> M -> (
+subring Matrix := opts -> M -> (
     new Subring from{
         "ambientRing" => ring M,
         "generators" => M,
@@ -38,7 +38,7 @@ subring Matrix := {VarBaseName => "p"} >> opts -> M -> (
         cache => new CacheTable from {}
     }
 )
-subring List := {VarBaseName => "p"} >> opts -> L -> subring(opts, matrix{L})
+subring List := opts -> L -> subring(opts, matrix{L})
 
 -- Subring access functions
 
@@ -221,7 +221,7 @@ RingElement % Subring := (f, A) -> (
 	) else if ring f =!= pres#"TensorRing" then(
 	error "The RingElement f must be in either TensorRing or ambient A.";
 	);
-    ans := (subduction(A, f));
+    ans := (internalSubduction(A, f));
     ans
     );
 

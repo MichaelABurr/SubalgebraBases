@@ -2,7 +2,7 @@ pathToPackage = "./SubalgebraBases.m2"
 installPackage(
     "SubalgebraBases",
     FileName=>pathToPackage,
-    RunExamples => true,
+    RunExamples => false,
     RerunExamples => false
     )
 

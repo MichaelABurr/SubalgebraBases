@@ -17,7 +17,7 @@ export {
     -- subR is any Subring instance.
 genVars = method(TypicalValue => Matrix)
 genVars(Subring) := subR ->(
-    selectInSubring(1, vars subR#"PresRing"#"TensorRing")    
+    selectInSubring(1, vars subR#"presentation"#"tensorRing")    
     );
 
 
@@ -200,8 +200,8 @@ autosubduce(Matrix) := G -> (
     	notS := compress submatrix'(matrix({toList noDupes}),,{i});
 	if zero notS then return Matrix {{s}};
 	
-    subringNotS := subring notS;
-	answer := subringNotS#"presentation"#"fullSubstitution"(subduction(subringNotS, s));
+    presNotS := makePresRing(ring notS,notS);
+	answer := presNotS#"fullSubstitution"(internalSubduction(presNotS, s));
     	if(answer != 0) then ( 
 	    answer = answer*(1/leadCoef(answer));
 	    );

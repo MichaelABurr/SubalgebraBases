@@ -1,7 +1,7 @@
 debug Core -- gets rid of "raw" error during installation. probably a better way...
 
 export {
-    "subduction",
+    "internalSubduction", -- Perhaps remove internalSubduction from export list.
     "subalgebraBasis",
     "sagbi",
     "PrintLevel",
@@ -17,13 +17,12 @@ export {
 
 -- Perhaps make this so that you can give it a matrix instead of a subring?
 -- If we were to do this, check that the output is used consistently
-subduction = method(TypicalValue => RingElement)
-subduction(Subring, RingElement) := (subR, f) -> (
-    pres := subR#"presentation";
+internalSubduction = method(TypicalValue => RingElement)
+internalSubduction(PresRing, RingElement) := (pres, f) -> (
     tense := pres#"tensorRing";
     if ring f === tense then (
 	f = (pres#"fullSubstitution")(f);
-	)else if ring f =!= ambient subR then (
+	)else if ring f =!= source pres#"inclusionAmbient" then (
 	error "f must be from the (ambient subR) or subR's TensorRing.";
 	);
         
@@ -31,20 +30,16 @@ subduction(Subring, RingElement) := (subR, f) -> (
     -- than pres#"TensorRing". In this case, it shouldn't try to prevent an error by using "sub"
     -- or something. Instead, the following line will deliberately throw an error:
     -- (This is done because otherwise there is potential for a segfault.)
-    throwError := f - 1_(ambient subR);   
+    throwError := f - 1_(source pres#"inclusionAmbient");   
     
-    -- We no longer store a groebner basis each time
-    -- Will this be expensive to recompute a groebner basis each time?
-    -*
-    if not subR.cache#?"SyzygyIdealGB" then (
-	subR.cache#"SyzygyIdealGB" = gb (pres#"SyzygyIdeal");
-	);
-    J := subR.cache#"SyzygyIdealGB";
-    *-
+    -- Use the same pres ring as much as possible.  
+    -- M2 will automatically cache the gb calculation 
+    -- as long as the pres ring is not reconstructed.
     J := gb (pres#"syzygyIdeal");
         
     F := pres#"substitution";
-    numblocks := rawMonoidNumberOfBlocks raw monoid ambient subR;
+    M := monoid source pres#"inclusionAmbient";
+    numblocks := rawMonoidNumberOfBlocks raw M;
     fMat := matrix({{pres#"inclusionAmbient"(f)}});    
     result := rawSubduction(numblocks, raw fMat, raw F, raw J);
     result = promote(result_(0,0), tense);    
@@ -57,9 +52,9 @@ subduction(Subring, RingElement) := (subR, f) -> (
 -- (M2) subduction(Matrix) -> (M2) subduction(RingElement) -> (C++) rawSubduction(Matrix) -> (C++) subduction(RingElement)
 -- If we deleted the C++ rawSubduction(Matrix) function and made rawSubduction take a RingElement, we could have:
 -- (M2) subduction(Matrix) -> (M2) subduction(RingElement) -> (C++) subduction(RingElement)
-subduction(Subring, Matrix) := (subR, M) -> (	
+internalSubduction(PresRing, Matrix) := (pres, M) -> (	
     ents := for i from 0 to (numcols M)-1 list(
-    	subduction(subR, M_(0,i))
+    	internalSubduction(pres, M_(0,i))
 	);
     matrix({ents})
     );
@@ -151,9 +146,9 @@ sagbi(SAGBIBasis) := o -> S -> (
     	if o.PrintLevel > 0 then (
     	    print("-- Computing the kernel of the substitution homomorphism to the initial algebra...");
 	    );
-	sagbiGB = gb(pres#"syzygyIdeal", DegreeLimit => compTable#"stoppingData"#"degree"); 
+	sagbiGB := gb(pres#"syzygyIdeal", DegreeLimit => compTable#"stoppingData"#"degree"); 
 	zeroGens := submatByDegree(mingens ideal selectInSubring(1, gens sagbiGB), compTable#"stoppingData"#"degree");
-	syzygyPairs = pres#"substitution"(zeroGens);
+	syzygyPairs := pres#"substitution"(zeroGens);
 	
 	break; 
 	);
@@ -175,7 +170,7 @@ sagbi(SAGBIBasis) := o -> S -> (
 	    print("-- Num. S-polys before subduction:"|toString(numcols syzygyPairs));
 	    );
 	
-       	subd := subduction(partialSagbi, syzygyPairs);
+       	subd := internalSubduction(partialSagbi, syzygyPairs);
 	
 	local newElems;
        	if entries subd != {{}} then (
