@@ -139,7 +139,7 @@ makePresRing(Ring, List) := opts -> (R, gensR) ->(
     gensR = sort gensR;
 
     if #gensR == 0 then(
-        error "List passed to makePresRing must not be empty.";
+        error "List must not be empty.";
     );
 
     if(ring(matrix({gensR})) =!= R) then(

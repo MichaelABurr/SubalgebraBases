@@ -2,6 +2,7 @@ debug Core -- gets rid of "raw" error during installation. probably a better way
 
 export {
     "internalSubduction", -- Perhaps remove internalSubduction from export list.
+    "subduction",
     "subalgebraBasis",
     "sagbi",
     "PrintLevel",
@@ -17,6 +18,20 @@ export {
 
 -- Perhaps make this so that you can give it a matrix instead of a subring?
 -- If we were to do this, check that the output is used consistently
+subduction = method(TypicalValue => RingElement)
+subduction(Matrix, RingElement) := (M, f) -> (
+    pres := makePresRing(ring M, M);
+    result := pres#"fullSubstitution" internalSubduction(pres, f);
+    result
+    )
+subduction(Matrix, Matrix) := (M, N) -> (
+    pres := makePresRing(ring M, M);	
+    ents := for i from 0 to (numcols N)-1 list(
+    	pres#"fullSubstitution" internalSubduction(pres, N_(0,i))
+	);
+    matrix({ents})
+    );
+
 internalSubduction = method(TypicalValue => RingElement)
 internalSubduction(PresRing, RingElement) := (pres, f) -> (
     tense := pres#"tensorRing";
