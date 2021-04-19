@@ -198,7 +198,7 @@ autosubduce(Matrix) := G -> (
     reducedGens := for i from 0 to (numcols G)-1 list(		
     	s := G_(0,i);
     	notS := compress submatrix'(matrix({toList noDupes}),,{i});
-	if zero notS then return Matrix {{s}};
+	if zero notS then return matrix{{s}};
 	
     presNotS := makePresRing(ring notS,notS);
 	answer := presNotS#"fullSubstitution"(internalSubduction(presNotS, s));
