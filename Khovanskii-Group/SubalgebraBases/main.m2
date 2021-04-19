@@ -148,7 +148,7 @@ sagbi(SAGBIBasis) := o -> S -> (
     remove(compTable#"pending", 0);
     
     compTable#"stoppingData"#"degree" = processPending(compTable) + 1;
-   
+
     while compTable#"stoppingData"#"degree" <= o.Limit and not compTable#"sagbiDone" do (  	
 	if o.PrintLevel > 0 then (
 	    print("---------------------------------------");
@@ -175,9 +175,9 @@ sagbi(SAGBIBasis) := o -> S -> (
     	end--
 	
 	-- Have we previously found any syzygies of degree currDegree?
-        if subalgComp#"pending"#(compTable#"stoppingData"#"degree") != {} then (
+        if subalgComp#"pending"#?(compTable#"stoppingData"#"degree") then (
             syzygyPairs = syzygyPairs | pres#"inclusionAmbient"(matrix{subalgComp#"pending"#(compTable#"stoppingData"#"degree")});
-            subalgComp#"Pending"#currDegree = {};
+            remove(subalgComp#"pending", compTable#"stoppingData"#"degree");
             );
 	
 	if o.PrintLevel > 0 then(
