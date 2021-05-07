@@ -13,11 +13,8 @@ export {
     "Autosubduce"
     }
 
--- Performs subduction using the generators of subR.
+-- Performs subduction using matrix of generators, M.
 -- currently does not require the generators to be a Sagbi basis.
-
--- Perhaps make this so that you can give it a matrix instead of a subring?
--- If we were to do this, check that the output is used consistently
 subduction = method(TypicalValue => RingElement)
 subduction(Matrix, RingElement) := (M, f) -> (
     pres := makePresRing(ring M, M);
@@ -38,11 +35,11 @@ internalSubduction(PresRing, RingElement) := (pres, f) -> (
     if ring f === tense then (
 	f = (pres#"fullSubstitution")(f);
 	)else if ring f =!= source pres#"inclusionAmbient" then (
-	error "f must be from the (ambient subR) or subR's TensorRing.";
+	error "f must be from ambR or tensorRing.";
 	);
         
     -- It is possible for ring f === ambient to be true but f is still from a different ring 
-    -- than pres#"TensorRing". In this case, it shouldn't try to prevent an error by using "sub"
+    -- than pres#"tensorRing". In this case, it shouldn't try to prevent an error by using "sub"
     -- or something. Instead, the following line will deliberately throw an error:
     -- (This is done because otherwise there is potential for a segfault.)
     throwError := f - 1_(source pres#"inclusionAmbient");   

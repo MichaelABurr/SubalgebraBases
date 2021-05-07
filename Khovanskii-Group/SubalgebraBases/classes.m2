@@ -57,6 +57,18 @@ isSagbi Subring := A -> A#"isSAGBI"
 
 SAGBIBasis = new Type of HashTable
 
+net SAGBIBasis := S -> (
+    numGens := numcols S#"sagbiGenerators";
+    sagbiLimit = S#"stoppingData"#"limit";
+    intro := null;
+    if S#"sagbiDone" then (
+    	intro = "SAGBIBasis Computation Object with ";
+    ) else (
+    	intro = "Partial SAGBIBasis Computation Object with ";
+    );
+    intro | toString(numGens) | " generators, Limit = " | toString(sagbiLimit) | "."
+)
+
 sagbiBasis = method(Options => true)
 sagbiBasis Subring := {limit => -1} >> opts -> S -> (
     stopping := new HashTable from {"limit" => opts.limit, "degree" => -1};
@@ -92,7 +104,6 @@ gens SAGBIBasis := o -> S -> (
     if #flatten entries S#"sagbiGenerators" == 0 then S#"subringGenerators"
     else if S#"sagbiDone" then (S#"sagbiGenerators")
     else (
-        << "The subring generators should be subducted by the sagbi generators.  This is not yet implemented";
         S#"subringGenerators" | S#"sagbiGenerators"
     )
 )
@@ -205,70 +216,72 @@ makePresRing(Ring, List) := opts -> (R, gensR) ->(
 -- A subring is already associated with an immutable PresRing instance which should be used instead of
 -- constructing a new instance. Don't use makePresRing when you can use the function subring.
 makePresRing(Subring) := opts -> subR -> (
-    subR#"PresRing"
+    subR#"presentation"
 );
 
--- Old things, to be edited.
-
 -- f % Subring is never going to be an element of the subalgebra, hence the ouput
--- is in the lower variables of TensorRing.
--- input: f in ambient A or TensorRing of A.
--- output: r in TensorRing of A such that f = a + r w/ a in A, r "minimal"
+-- is in the lower variables of tensorRing.
+-- input: f in ambient A or tensorRing of A.
+-- output: r in tensorRing of A such that f = a + r w/ a in A, r "minimal"
 RingElement % Subring := (f, A) -> (
-    pres := A#"PresRing";
+    pres := A#"presentation";
     if ring f === ambient A then(
-	f = (pres#"InclusionBase")(f);
-	) else if ring f =!= pres#"TensorRing" then(
-	error "The RingElement f must be in either TensorRing or ambient A.";
+	f = (pres#"inclusionAmbient")(f);
+	) else if ring f =!= pres#"tensorRing" then(
+	error "The RingElement f must be in either tensorRing or ambient A.";
 	);
-    ans := (internalSubduction(A, f));
+    ans := (internalSubduction(pres, f));
     ans
     );
 
 -- f // Subring is always going to be inside of the subalgebra, hence the output
--- should be in the upper variables of TensorRing.
--- NOTE: If you want to compute FullSub(f//A), it is a lot faster to compute f-(f%A).
--- input: f in ambient A or TensorRing of A.
--- output: a in TensorRing of A such that f = a + r w/ a in A, r "minimal."
+-- should be in the upper variables of tensorRing.
+-- NOTE: If you want to compute fullSubstitution(f//A), it is a lot faster to compute f-(f%A).
+-- input: f in ambient A or tensorRing of A.
+-- output: a in tensorRing of A such that f = a + r w/ a in A, r "minimal."
 RingElement // Subring := (f, A) -> (
-    pres := A#"PresRing";
-    tense := pres#"TensorRing";
+    pres := A#"presentation";
+    tense := pres#"tensorRing";
     if ring f === ambient A then(
-	f = (pres#"InclusionBase")(f);
+	f = (pres#"inclusionAmbient")(f);
 	) else if ring f =!= tense then(
-	error "The RingElement f must be in either the TensorRing or ambient ring of A.";
+	error "The RingElement f must be in either the tensorRing or ambient ring of A.";
 	);
     result := f - (f % A);
-    I := pres#"LiftedPres";
+    I := pres#"liftedPres";
     result % I
     );
 
 -- Sends each entry e to e%A
 Matrix % Subring := (M, A) -> (
-    pres := A#"PresRing";
+    pres := A#"presentation";
     ents := for i from 0 to numrows M - 1 list(
 	for j from 0 to numcols M - 1 list(M_(i,j) % A)
 	);
-    matrix(pres#"TensorRing", ents)
+    matrix(pres#"tensorRing", ents)
     );
 
 -- Sends each entry e to e//A
 Matrix // Subring := (M, A) -> (
-    pres := A#"PresRing";
+    pres := A#"presentation";
     ents := for i from 0 to numrows M - 1 list(
 	for j from 0 to numcols M - 1 list(M_(i,j) // A)
 	);
-    matrix(pres#"TensorRing", ents)
+    matrix(pres#"tensorRing", ents)
     );
 
 -- Returns the tensor ring because the function ambient returns the ambient ring.
 ring Subring := A -> (
-A#"PresRing"#"TensorRing"
+A#"presentation"#"tensorRing"
 );
 
 end---Michael
 
-end-- Old classes.m2
+
+----------------------------------------------------------------------------------------
+
+
+end-- Old classes.m2 below
 
 export {
     "Subring",
