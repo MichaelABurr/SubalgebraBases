@@ -45,221 +45,6 @@ doc ///
       
 ///
 
-doc /// 
-    Key
-        "SAGBI bases of subrings of quotient rings"
-    Description
-        Text
-          The SAGBI algorithm implementation used in this package was originally written by Mike Stillman in approximately 1999
-	  for the purpose of implementing concepts from the paper "Using SAGBI bases to compute invariants" by Stillman and Tsai.
-	  Namely, the purpose was to be capable of calculating Sagbi bases of subrings contained in quotient rings. 
-	  
-	  Although this purpose was not understood by later programmers, the code still retains this capability. However, there are
-	  some pecularities. Consider the following example: 
-	  
-	Example
-	  gndR = QQ[x,y, MonomialOrder => Lex];
-	  I = ideal(x^2 - x*y);
-	  Q = gndR/I;
-	  subR = sagbi subring {x};
-	  gens subR
-	  
-	Text 
-	
-	  Because $x^2 = xy$ inside of the quotient ring $\mathbb{Q}[x,y]/(x)$, the resulting Sagbi basis $(x)$ cannot be correct because
-	  it does not involve $y$.
-	
-	  In this example, the algorithm terminated successfully because it has no way of knowing that $x^2 = xy$ inside of the
-	  ambient ring of subR. Technically, one could argue that this isn’t a bug because it’s actually doing what it is
-	  supposed to do according to the specification. Notice that the Sagbi algorithm’s proof of correctness in Proposition 3
-	  of "Using SAGBI bases to compute invariants" by Stillman and Tsai does not apply when a finite Sagbi basis doesn’t exist. 
-	  So, fixing this “bug” is really a question of whether or not it is possible to improve upon the underlying algorithm.
-	  
-	  What this means is that it is possible for the Sagbi algorithm to falsely succeed when the ambient ring is a quotient ring. 
-	  However, when a finite SAGBI basis does happen to exist, the algorithm *should* be able to calculate it correctly given enough
-	  time.
-	  
-	  The following is an example of a correct Sagbi computation over a subring of a quotient ring. It is an implementation of
-	  Example 2 of Stillman and Tsai in the case $N=4$. 
-	CannedExample
-	  N = 4;
-	  gndR = QQ[(a,b,c,d)|(u_1..u_N)|(v_1..v_N), MonomialOrder => Lex];
-	  I = ideal(a*b - b*c - 1);
-	  quot = gndR/I;
-	  U = (vars quot)_{4..(N+3)}
-	  V = (vars quot)_{(N+4)..(2*N+3)}
-	  G = flatten for i from 0 to N-1 list(
-    	      {a*(U_(0,i)) + b*(V_(0,i)), c*(U_(0,i)) + d*(V_(0,i))}
-    	      );
-	  sag = sagbi G
-	  ans = matrix {{c*u_4+d*v_4, c*u_3+d*v_3, c*u_2+d*v_2, c*u_1+d*v_1, a*u_4+b*v_4, a*u_3+b*v_3, a*u_2+b*v_2,
-     		  a*u_1+b*v_1, a*d*u_3*v_4-a*d*u_4*v_3-b*c*u_3*v_4+b*c*u_4*v_3,
-     		  a*d*u_2*v_4-a*d*u_4*v_2-b*c*u_2*v_4+b*c*u_4*v_2, a*d*u_2*v_3-a*d*u_3*v_2-b*c*u_2*v_3+b*c*u_3*v_2,
-     		  a*d*u_1*v_4-a*d*u_4*v_1-b*c*u_1*v_4+b*c*u_4*v_1, a*d*u_1*v_3-a*d*u_3*v_1-b*c*u_1*v_3+b*c*u_3*v_1,
-     		  a*d*u_1*v_2-a*d*u_2*v_1-b*c*u_1*v_2+b*c*u_2*v_1}}
-	  assert (gens sag == ans);
-    SeeAlso
-    	
-///
-doc /// 
-    Key
-        "Experimental implementation of modules over subrings"
-    Description
-        Text
-	  In order to explain how modules over subrings are implemented in this package, it will be helpful to look at an example. 
-	  The following is an implementation of Example 11.19 from "Groebner bases and Convex Polytopes" by Bernd Sturmfels:
-        CannedExample
-	  i = 2;
-	  gndR = QQ[t_1, t_2, t_3];
-	  A := {t_1*t_2*t_3,
-		t_1^2*t_2,
-		t_1*t_2^2,
-		t_1^2*t_3,
-		t_1*t_3^2,
-		t_2^2*t_3,
-		t_2*t_3^2};
-	  G := matrix {{t_1^(2*i)*t_2^(2*i)*t_3^(2*i), t_1^((3*i)+2)*t_2*t_3^(3*i)}}
-	  subR = sagbi subring A;
-	  assert((set first entries gens subR) === (set A)); 
-	  tsyz := toricSyz(subR, G);
-	  assert(tsyz * (transpose G) == 0);
-
-	  ans1 = mingensSubring(subR, tsyz);  
-	Text
-	  The resulting value of ans1 and its normal form are:
-	CannedExample
-	  i13 : ans1
-
-	  o13 = | t_1^4t_3^5    -t_2^3t_3^3    |
-		| t_1^4t_2t_3^4 -t_2^4t_3^2    |
-		| t_1^5t_3^4    -t_1t_2^3t_3^2 |
-		| t_1^5t_2t_3^3 -t_1t_2^4t_3   |
-		| t_1^6t_3^3    -t_1^2t_2^3t_3 |
-		| t_1^6t_2t_3^2 -t_1^2t_2^4    |
-		| t_1^4t_3^8    -t_2^3t_3^6    |
-
-			7       2
-	  o13 : Matrix R  <--- R
-	  
-	  i14 : ans1//subR
-
-	  o14 = | p_4^2p_7  -p_3p_5 |
-	       | p_4^2p_9  -p_5^2  |
-	       | p_4p_7^2  -p_3p_8 |
-	       | p_4p_7p_9 -p_5p_8 |
-	       | p_7^3     -p_5p_9 |
-	       | p_7^2p_9  -p_8^2  |
-	       | p_4^4     -p_3^3  |
-
-				  7                  2
-	  o14 : Matrix (QQ[p ..p ])  <--- (QQ[p ..p ])
-			   0   9              0   9
-    	Text
-	  This appears to agree with Sturmfels's prediction, although it is not possible to be entirely certain that this computation
-	  is correct without knowing more than the information contained in the Sturmfels text. This is because Sturmfels does not 
-	  fully specify what the set of minimal generators of this syzygy module are. Namely, it is only stated that it must include
-	  $2i+2=6$ syzygies of total degree $i+1 = 3$.
-	
-	  The following code is the implementation of the function @TT "mingensSubring"@:
-	  
-	CannedExample	
-	  -- Performs autoreduction on M treated as a module over subR.
-	  mingensSubring = method(TypicalValue => Matrix)
-	  mingensSubring(Subring, Matrix) := (subR, M) -> (  
-	      (A, B, gVars)  := moduleToSubringIdeal(subR, M);
-	      final := autoreduce(A, transpose B);
-	      -- Sort the rows of the matrix for more predictable behavior.
-	      final = matrix transpose {sort first entries transpose final};
-	      final = extractEntries(final, gVars);
-	      subR#"PresRing"#"FullSub"(sub(final,subR#"PresRing"#"TensorRing"))
-	      );
-	Text
-	   The function @TT "mingensSubring"@ works by converting the given matrix (which should be thought of as a module) to an 
-	   ideal inside of a subring, and then performing autoreduction on the generators of that ideal. It relies on the function
-	   @TT "moduleToSubringIdeal"@ to construct a suitable subring and provide the generators that define this ideal.
-	   
-	   In order to understand how the function @TT "moduleToSubringIdeal"@ works, it is neccessary to understand some properties
-	   of the @TO "Subring"@ type. Consider the output of the following command:
-	CannedExample
-	  i5 : debugPrintMap (subR#"PresRing"#"FullSub")
-	  maps p_0 to t_1
-	  maps p_1 to t_2
-	  maps p_2 to t_3
-	  maps p_3 to t_2*t_3^2
-	  maps p_4 to t_1*t_3^2
-	  maps p_5 to t_2^2*t_3
-	  maps p_6 to t_1*t_2*t_3
-	  maps p_7 to t_1^2*t_3
-	  maps p_8 to t_1*t_2^2
-	  maps p_9 to t_1^2*t_2
-        Text
-	  
-	  @TT "p_1"@, ..., @TT "p_9"@ are the variables of what is refered to in the code as the "TensorRing". The @TT "TensorRing"@ of @TT "subR"@ has two parts:
-	  the "lower variables," and the "upper variables."
-	  
-	  The variables @TT "p_0"@, @TT "p_1"@ and @TT "p_2"@ are the lower variables of subR#"PresRing". They correspond to the variables of the "ambient ring"
-	  of @TT "subR"@, which is @TT "gndR"@ in our original example. The upper variables of @TT "subR"@ are @TT "p_3"@, ..., @TT "p_9"@. These correspond to
-	  generators of the subring.
-	  
-	  The following command converts the toric syzygy module from our example (which is returned by @TT "toricSyz"@ in the form of a matrix) to an ideal 
-	  within a subring. This is identical to the @TT "moduleToSubring(subR, tsyz)"@ call that occurs in the first line of @TT "mingensSubring"@. 
-	CannedExample
-	   i15 : (modRing, idealGens, gVars) = moduleToSubringIdeal(subR, tsyz)
-
-	   o15 = (subring of QQ[p_0..p_11], | -p_0^6p_2^3p_10+p_0^2p_1^3p_2p_11   |, | p_10 p_11 |)
-					    | -p_0^6p_1p_2^2p_10+p_0^2p_1^4p_11   |
-					    | -p_0^6p_2^3p_10+p_0^2p_1^3p_2p_11   |
-					    | -p_0^5p_1p_2^3p_10+p_0p_1^4p_2p_11  |
-					    | -p_0^5p_2^4p_10+p_0p_1^3p_2^2p_11   |
-					    | -p_0^5p_2^4p_10+p_0p_1^3p_2^2p_11   |
-					    | -p_0^4p_1p_2^4p_10+p_1^4p_2^2p_11   |
-					    | -p_0^4p_2^5p_10+p_1^3p_2^3p_11      |
-					    | p_0^8p_2^4p_10-p_0^4p_1^3p_2^2p_11  |
-					    | -p_0^7p_2^5p_10+p_0^3p_1^3p_2^3p_11 |
-					    | -p_0^5p_2^7p_10+p_0p_1^3p_2^5p_11   |
-					    | -p_0^4p_2^8p_10+p_1^3p_2^6p_11      |
-					    | -p_0^6p_2^6p_10+p_0^2p_1^3p_2^4p_11 |
-					    
-	   i16 : debugPrintMap(modRing#"PresRing"#"FullSub")
-	   maps p_0 to p_0
-	   maps p_1 to p_1
-	   maps p_2 to p_2
-	   maps p_3 to p_3
-	   maps p_4 to p_4
-	   maps p_5 to p_5
-	   maps p_6 to p_6
-	   maps p_7 to p_7
-	   maps p_8 to p_8
-	   maps p_9 to p_9
-	   maps p_10 to p_10
-	   maps p_11 to p_11
-	   maps p_12 to p_10
-	   maps p_13 to p_11
-	   maps p_14 to p_1*p_2^2
-	   maps p_15 to p_0*p_2^2
-	   maps p_16 to p_1^2*p_2
-	   maps p_17 to p_0*p_1*p_2
-	   maps p_18 to p_0^2*p_2
-	   maps p_19 to p_0*p_1^2
-	   maps p_20 to p_0^2*p_1
-    	Text
-	  The ambient ring of @TT "modRing"@ is the tensor ring of @TT "subR"@, except two new variables @TT "p_10"@ and @TT "p_11"@ have been added.
-	  The variables @TT "p_10"@ and @TT "p_11"@ correspond to the generators of the module. The generators @TT "p_12"@ and @TT "p_13"@ also correspond
-	  to the generators of the module, except they are @ITALIC "upper"@ rather than @ITALIC "lower"@ variables.
-	  
-	  The primary reason why this implementation should be considered experimental is that the monomial order of a module is not fully specified. 
-	  
-	  When a @TO "Subring"@ instance is created using the function @TO "subring"@, the monomial order of the lower variables is the same as the monomial
-	  order of their corresponding variables in the ambient ring while the monomial order of the upper variables is assigned arbitrarily. This monomial 
-	  order is fine for the purposes of basic subring computations that this package's code was originally designed to perform. The problem with this system is 
-	  that it is likely to cause bugs in the case where a subring's ambient ring is the tensor ring of another subring. 
-	  
-	  	 
-    SeeAlso
-      (moduleToSubringIdeal, Subring, Matrix)
-      (mingensSubring, Subring, Matrix)
-      (symbol ^, Subring, ZZ)
-///
 
 doc ///
    Key
@@ -480,6 +265,7 @@ doc ///
        sagbi
 ///
 
+-*
 doc ///
    Key
      subring
@@ -517,6 +303,7 @@ doc ///
    SeeAlso
      Subring
 ///
+*-
 
 doc ///
    Key
@@ -569,212 +356,7 @@ doc ///
      (internalSubduction, PresRing, RingElement)
 ///
 
-doc ///
-   Key
-     debugPrintAllMaps
-     (debugPrintAllMaps, Subring)
-   Headline
-     Prints the maps associated with a subring.
-   Usage
-     debugPrintAllMaps(subR)
-   Inputs
-     subR:Subring
-    	any subring.
-   Outputs
-   Description
-     Text
-       Prints a summary of the maps associated with a Subring instance. 
-       
-       It is easy to get confused about what the various maps and rings stored inside of a @TO "Subring"@ instance are. 
-              
-       Although not strictly neccessary, this function makes this package easier to learn and debug.       
-     Example 
-       R = QQ[t_1, t_2];
-       subR = subring matrix(R, {{t_1^2, t_1*t_2, t_2^2}});
-       debugPrintAllMaps(subR)
-   SeeAlso
-     (debugPrintAllMaps, Subring)
-     (debugPrintGens, Subring)
-     (debugPrintMap, RingMap)
-     (debugPrintMat, Matrix)
-///
 
-doc ///
-   Key
-     debugPrintGens
-     StrWidth
-     (debugPrintGens, Subring)
-     [debugPrintGens, StrWidth]
-   Headline
-     Prints the generators of a subring.
-   Usage
-     debugPrintGens(subR)
-   Inputs
-     subR:Subring
-       any subring.
-     StrWidth=>ZZ
-       The maximum width (in characters) to print.
-
-   Outputs
-   Description
-     Text
-       Prints the generators of a subring in a human readable-format.
-       
-       The optional argument @TO "StrWidth"@ determines the maximum number of characters to print in a single line.
-       Polynomials whose net representation is wider than @TO "StrWidth"@ characters are cut off.
-              
-     Example 
-       R = QQ[t_1, t_2];
-       subR = subring matrix(R, {{t_1^2, t_1*t_2, t_2^2}});
-       debugPrintGens(subR)
-   SeeAlso
-     (debugPrintAllMaps, Subring)
-     (debugPrintGens, Subring)
-     (debugPrintMap, RingMap)
-     (debugPrintMat, Matrix)
-///
-
-doc ///
-   Key
-     debugPrintMap
-     (debugPrintMap, RingMap)
-   Headline
-     Prints a RingMap in human-readable format.
-   Usage
-     debugPrintGens(f)
-   Inputs
-     f:RingMap
-    	any RingMap.
-   Outputs
-   Description
-     Text
-       Prints a single RingMap in a human-readable format.
-     Example 
-       R = QQ[t_1, t_2];
-       subR = subring matrix(R, {{t_1^2, t_1*t_2, t_2^2}});
-       debugPrintMap(subR#"PresRing"#"Substitution")
-   SeeAlso
-     (debugPrintAllMaps, Subring)
-     (debugPrintGens, Subring)
-     (debugPrintMap, RingMap)
-     (debugPrintMat, Matrix)
-///
-
-doc ///
-   Key
-     debugPrintMat
-     (debugPrintMat, Matrix)
-     [debugPrintMat, StrWidth]
-   Headline
-     Prints a one-row matrix of in human-readable format.
-   Usage
-     debugPrintMat(M)
-   Inputs
-     M:Matrix
-       A one row-matrix.
-     StrWidth=>ZZ
-       The maximum width (in characters) to print.
-   Outputs
-   Description
-     Text
-       Given a one row matrix of (potentially very large) polynomials, prints each entry in human-readable format.
-       
-       The optional argument @TO "StrWidth"@ determines the maximum number of characters to print in a single line.
-       Polynomials whose net representation is wider than @TO "StrWidth"@ characters are cut off.
-
-     Example 
-       R = QQ[t_1, t_2];
-       debugPrintMat(matrix {{t_1^2, t_1*t_2, t_2^2}})
-   SeeAlso
-     (debugPrintAllMaps, Subring)
-     (debugPrintGens, Subring)
-     (debugPrintMap, RingMap)
-     (debugPrintMat, Matrix)
-///
-
-doc ///
-   Key
-     extractEntries
-     (extractEntries, Matrix, Matrix)
-   Headline
-     Can be thought of as the inverse of moduleToSubringIdeal
-   Usage
-     extractEntries(M, gVars)
-   Inputs
-     M:Matrix
-    	A 1-column matrix that is probably the result of a call to moduleToSubringIdeal.
-     gVars:Matrix 
-        A 1-row matrix containing the variables that correspond to the generators of the module.
-   Outputs
-     result:Matrix
-        
-   Description
-     Text
-         
-       Converts elements of a subring ideal (represented by a one-column matrix) to elements 
-       of a module (represented by a matrix.)
-
-       Internally, the argument gVars is sorted so that the order of the columns of the resulting
-       matrix is consistent.
-       
-     Example 
-       R = QQ[a, b, c, x_1, x_2, x_3];
-       extractEntries(matrix {{a*x_1 + b*x_2 + c*x_3}}, matrix {{x_1, x_2, x_3}})
-       extractEntries(matrix {{a*x_1 + b*x_2 + c*x_3},{a*x_1 + a*x_2 + a*x_3}}, matrix {{x_1, x_2, x_3}} )
-   SeeAlso
-     (moduleToSubringIdeal, Subring, Matrix)
-///
-
-
-doc ///
-   Key
-     extrinsicBuchberger
-     (extrinsicBuchberger, Subring, Matrix)
-   Headline
-     Computes a Gröbner basis of an ideal within a Subring.
-   Usage
-     extrinsicBuchberger(M, gVars)
-   Inputs
-     M:Matrix
-    	A 1-column matrix that is probably the result of a call to moduleToSubringIdeal.
-     gVars:Matrix 
-        A 1-row matrix containing the variables that correspond to the generators of the module.
-   Outputs
-     result:Matrix
-        
-   Description
-     Text
-       This is an implementation of Algorithm 11.24 of "Gröbner Bases and Convex Polytopes" by Bernd Sturmfels. (DOI: 
-       http://dx.doi.org/10.1090/ulect/008)
-       
-       To understand how this function works, recall computing a Gröbner Basis can be thought of as a generalization
-       of Gaussian elimination. This function works the same way as the function @TO (groebnerBasis,Matrix)@, except
-       the "field of scalars" is a subring.
-///
-
-doc ///
-   Key
-     genVars
-     (genVars, Subring)
-   Headline
-     Returns the variables corresponding to the subalgebra generators in the tensor ring.
-   Usage
-     result = gevVars(subR)
-   Inputs
-     subR:Subring
-   Outputs
-     result:Matrix
-   Description
-     Text
-       This returns the "upper variables" of the tensor ring of a @TO "Subring"@ instance. These variables correspond to
-       generators of the subring.
-     Example
-       R = QQ[t_1, t_2, t_3];
-       A := {t_1*t_2*t_3, t_1^2*t_2, t_1*t_2^2, t_1^2*t_3, t_1*t_3^2, t_2^2*t_3, t_2*t_3^2};
-       subR = subring A;
-       genVarsSubR = genVars subR
-       subR#"PresRing"#"Substitution"(genVarsSubR)
-///
 
 doc ///
    Key
@@ -1017,50 +599,6 @@ doc ///
        toMonomial(gndR, {5,2,1})
 ///
 
-doc ///
-   Key
-     internalSubduction
-     (internalSubduction, PresRing, RingElement)
-     (internalSubduction, PresRing, Matrix)
-     (symbol %, Matrix, Subring)
-   Headline
-     Performs subduction relative to the generators of a subring.
-   Inputs
-     subR:Subring
-     f:RingElement
-         An element of the tensor ring or ambient ring of f.
-     M:Matrix
-     	 A one-row matrix containing elements of the tensor ring or ambient ring of f.
-   Outputs
-     result:RingElement
-       An element of the tensor ring of subR
-     resultMat:Matrix
-   Usage 
-     result = internalSubduction(pres, f)
-     resultMat = internalSubduction(pres, M)
-   Description
-     Text
-       If the second argument is a one-row matrix, subduction is performed on each entry 
-       individually and the resulting one-row matrix is returned. If the second argument is
-       a ring element @TT "f"@, subduction is performed on @TT "f"@ and the result is returned.
-
-       The subring @TT "subR"@ is not required to be a Sagbi basis. The reasoning behind this is
-       because it is not neccessary for the set of subring generators to be a Sagbi basis in order
-       for the subduction algorithm to be well-defined.
-
-       The result of this function is a member of the TensorRing of @TT "subR"@. The following 
-       example shows how to convert this to an element of the ambient ring of @TT "subR"@ (i.e.,
-       the ring that contains @TT "gens subR"@) if that is the desired behavior.
-     
-     Example
-       gndR = QQ[symbol t_1, symbol t_2, symbol t_3];
-       G = matrix {{t_1^4*t_2^4*t_3^4, (t_1^8)*t_2*t_3^8}}
-       pres = makePresRing(gndR,G);
-       internalSubduction(pres, G_(0,0))
-       internalSubduction(pres, G_(0,0)*G_(0,1) + t_1)
-       f = internalSubduction(pres, t_1)
-       (pres#"ProjectionBase")(f)
-///
 
 
 doc ///
@@ -1147,29 +685,6 @@ doc ///
 ///
 
 
-doc ///
-   Key
-     (ring, Subring)
-   Headline
-     Returns the "tensor ring" of a subring.
-   Inputs
-     subR:Subring
-         The subring to construct a free module over.
-   Outputs
-     result:Ring
-   Usage 
-     result = ring(subR)
-   Description
-     Text
-       For a description of what the tensor ring is, see the documentation of @TO "PresRing"@ and @TO "Subring"@.
-     Example
-       gndR = QQ[x,y,z];
-       subR = subring({x^2, y^2, z^2});
-       ring subR
-   SeeAlso
-     (ambient, Subring)
-     (gens, Subring)
-///
 
 doc ///
    Key
@@ -1241,6 +756,8 @@ doc ///
 ///
 
 
+-*
+-- FIX ME
 doc ///
    Key
      (symbol //, RingElement, Subring)
@@ -1271,3 +788,4 @@ doc ///
        g = f//A
        (A#"PresRing"#"FullSub")(g) == f
 ///
+*-
