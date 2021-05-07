@@ -128,13 +128,12 @@ sagbi(Subring) := o -> S -> (
 -- PrintLevel > 0: Print some information each loop, but don't print any polynomials.
 -- PrintLevel > 1: Print new Sagbi gens.
 sagbi(SAGBIBasis) := o -> S -> (
-    if S#"sagbiDone" then return S;
+    if (S#"stoppingData"#"limit" > o.Limit) or S#"sagbiDone" then return S;
     
     compTable := new MutableHashTable from S;
     compTable#"pending" = new MutableHashTable from compTable#"pending";
     compTable#"stoppingData" = new MutableHashTable from compTable#"stoppingData";
-
-    if (compTable#"stoppingData"#"degree" > o.Limit) or compTable#"sagbiDone" then return S;
+    compTable#"stoppingData"#"limit" = max {compTable#"stoppingData"#"limit",o.Limit};
     
     if o.Autosubduce then(
 	if o.PrintLevel > 0 then (

@@ -58,7 +58,7 @@ isSagbi Subring := A -> A#"isSAGBI"
 SAGBIBasis = new Type of HashTable
 
 sagbiBasis = method(Options => true)
-sagbiBasis Subring := {limit => 100} >> opts -> S -> (
+sagbiBasis Subring := {limit => -1} >> opts -> S -> (
     stopping := new HashTable from {"limit" => opts.limit, "degree" => -1};
     pending := new HashTable;
     new SAGBIBasis from {
