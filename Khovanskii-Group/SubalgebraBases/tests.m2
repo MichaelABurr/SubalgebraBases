@@ -1,35 +1,36 @@
 -- 0) Subring tests
--- 1) SubalgebraBases tests
--- 2) Infinite generators
--- 3)
--- 4)
--- 5)
--- 6)
--- 7)
--- 8)
--- 9)
--- 10)
--- 11)
--- 12)
--- 13)
--- 14)
--- 15)
--- 16)
--- 17)
+-- 1) Infinite generators
+-- 2) simple inhomog example
+-- 3) invariants of S3
+-- 4) invariants of S4
+-- 5) generic minors(2,2,10)
+-- 6) generic minors(2,3,3)
+-- 7) generic minors(2,3,4)
+-- 8) example with both finite and infinite sagbi bases (infinite one)
+-- 9) example with both finite and infinite sagbi bases (finite one)
+-- 10) same example, with generic change of coordinates
+-- 11) invariants of A3 to degree 15
+-- 12) Invariants of A^1, with a nilpotent action on A^5
+-- 13) Invariants of A^1, with a nilpotent action on A^3
+-- 14) invariants of SL_2 on V + V + Sym^2(V) 
+-- 15) invariants of A^1, with a nilpotent action of A^4
+-- 16) elimination order on ambient ring
+-- 17) 'symmetric' quadratic artin ideal in 2x3 variables
+
 
 -- 0) Subring tests
-
 TEST ///
 R = QQ[x1, x2, x3];
 S = QQ[e1, e2, e3, y];
 f = map(R, S, {x1 + x2 + x3, x1*x2 + x1*x3 + x2*x3, x1*x2*x3,
 (x1 - x2)*(x1 - x3)*(x2 - x3)});
 A = subring matrix f;
-pR = presentationRing A;
-assert (presentation A == matrix {{pR_0^2*pR_1^2-4*pR_0^3*pR_2-4*pR_1^3+18*pR_0*pR_1*pR_2-27*pR_2^2-pR_3^2}})
+-- "presentationRing" and "presentation" removed 
+-- pR = presentationRing A;
+-- assert (presentation A == matrix {{pR_0^2*pR_1^2-4*pR_0^3*pR_2-4*pR_1^3+18*pR_0*pR_1*pR_2-27*pR_2^2-pR_3^2}})
 ///
+---------------------
 
--- 1) SubalgebraBases tests
 
 invariantsSn = (n) -> (
     -- ring of invariants of S_n
@@ -44,22 +45,19 @@ genericminors = (minorsize,rowsize,colsize) -> (
     R := ZZ/101[x_0 .. x_matdim];
     gens minors(minorsize,genericMatrix(R,x_0,rowsize,colsize)))
 
---------------------------------------------
--- test top-level and engine strategies on trivial example
 
--- 2) Infinite generators
-
+-- 1) Infinite generators
 TEST ///
 R=QQ[x,y,MonomialOrder=>Lex]
 M=matrix{{x+y,x*y,x*y^2}}
 assert(subalgebraBasis(M,Limit=>3)==M)
 assert(subalgebraBasis(M,Limit=>3,Strategy=>Engine)==M)
 ///
+--------------------------------------------
 
--- 3)
 
+-- 2) simple inhomog example
 TEST ///
--- simple inhomog example
 kk = ZZ/101
 R = kk[a,b,c]
 F = matrix{{a+b+c-1, a^2+b^2+c^2-a, a^3+b^3+c^3-b}}
@@ -71,10 +69,9 @@ assert(
 ///
 --------------------------------------------
 
--- 4)
 
+-- 3) invariants of S3
 TEST ///
--- invariants of S3
 invariantsSn = (n) -> (
     -- ring of invariants of S_n
     R = ZZ/101[x_0 .. x_(n-1)]; 
@@ -86,17 +83,12 @@ assert(
      time subalgebraBasis(F,Limit=>10)
      ==
      ans)
-assert(
-     time subalgebraBasis(F,Limit=>10,Strategy=>Engine)
-     ==
-     ans)
 ///
 --------------------------------------------
 
--- 5)
 
+-- 4) invariants of S4
 TEST ///
--- invariants of S4
 invariantsSn = (n) -> (
     -- ring of invariants of S_n
     R = ZZ/101[x_0 .. x_(n-1)]; 
@@ -111,17 +103,12 @@ assert(
      time subalgebraBasis(F,Limit=>10)
      ==
      ans)
-assert(
-     time subalgebraBasis(F,Limit=>10,Strategy=>Engine)
-     ==
-     ans)
 ///
 --------------------------------------------
 
--- 6)
 
+-- 5) generic minors(2,2,10)
 TEST ///
---generic minors(2,2,10)
 genericminors = (minorsize,rowsize,colsize) -> (
     -- k by k minors of a generic m by n matrix
     matdim := rowsize * colsize - 1;
@@ -175,20 +162,15 @@ ans = matrix {{x_17*x_18-x_16*x_19,
         x_1*x_4-x_0*x_5,
         x_1*x_2-x_0*x_3}}
 assert(
-     time subalgebraBasis(F,Limit=>100)
-     ==
-     ans)
-assert(
-     time subalgebraBasis(F,Limit=>100,Strategy=>Engine)
+     time subalgebraBasis(F,Limit=>100, Autosubduce=>false)
      ==
      ans)
 ///
 --------------------------------------------
 
--- 7)
 
+-- 6) generic minors(2,3,3)
 TEST ///
---generic minors(2,3,3)
 genericminors = (minorsize,rowsize,colsize) -> (
     -- k by k minors of a generic m by n matrix
     matdim := rowsize * colsize - 1;
@@ -211,17 +193,12 @@ assert(
      time subalgebraBasis(F,Limit=>100)
      ==
      ans)
-assert(
-     time subalgebraBasis(F,Limit=>100,Strategy=>Engine)
-     ==
-     ans)
 ///
 --------------------------------------------
 
--- 8)
 
+-- 7) generic minors(2,3,4)
 TEST ///
---generic minors(2,3,4)
 genericminors = (minorsize,rowsize,colsize) -> (
     -- k by k minors of a generic m by n matrix
     matdim := rowsize * colsize - 1;
@@ -239,8 +216,11 @@ assert(
      ==
      ans)
 ///
+
 ---------------------------------------------
 -- Commented out: takes too long right now --
+-- with Autosubduce ~30 seconds
+-- without Autosubduce ~25 seconds
 ---------------------------------------------
 ///
 --generic minors(2,3,5)
@@ -257,15 +237,15 @@ assert(
      ==
      ans)
 assert(
-     time subalgebraBasis(F,Limit=>100,Strategy=>Engine,PrintLevel=>1)
+     time subalgebraBasis(F,Limit=>100,PrintLevel=>1,Autosubduce=>false)
      ==
      ans)
 ///
+---------------------------------------------
 
--- 9)
 
+-- 8) example with both finite and infinite sagbi bases (infinite one)
 TEST ///
---example with both finite and infinite sagbi bases (infinite one)
 kk = ZZ/101
 R = kk[symbol x,symbol y]   -- x>y gives infinite, y>x gives finite
 F = matrix{{x, x*y-y^2, x*y^2}}
@@ -274,19 +254,12 @@ assert(
      time subalgebraBasis(F,Limit=>30,PrintLevel=>1)
      ==
      ans)
-assert(
-     time subalgebraBasis(F,Limit=>30,Strategy=>Engine)
-     ==
-     ans)
-
---     time sagbi(F,Limit=>100,PrintLevel=>1)
 ///
 --------------------------------------------
 
--- 10)
 
+-- 9) example with both finite and infinite sagbi bases (finite one)
 TEST ///
---example with both finite and infinite sagbi bases (finite one)
 kk = ZZ/101
 R = kk[symbol y,symbol x]   -- x>y gives infinite, y>x gives finite
 F = matrix{{x, x*y-y^2, x*y^2}}
@@ -295,17 +268,12 @@ assert(
      time subalgebraBasis(F,Limit=>1000)
      ==
      ans)
-assert(
-     time subalgebraBasis(F,Limit=>1000,Strategy=>Engine)
-     ==
-     ans)
 ///
 --------------------------------------------
 
--- 11)
 
+-- 10) same example, with generic change of coordinates
 TEST ///
---same example, with generic change of coordinates
 kk = ZZ/101
 R = kk[symbol x,symbol y]   -- Change of coordinates (i.e. random term order)
 F = matrix{{x, x*y-y^2, x*y^2}}
@@ -318,20 +286,14 @@ assert(
      time subalgebraBasis(F,Limit=>30)
      ==
      ans)
-assert(
-     time subalgebraBasis(F,Limit=>30, Strategy=>Engine)
-     ==
-     ans)
 ///
 --------------------------------------------
 
--- 12)
 
+-- 11) invariants of A3 to degree 15
 TEST ///
 -- invariants of A3, infinite sagbi bases, at least for lex order
 -- it is infinite for all term orders.
-
---invariants of A3, to degree 15
 kk = ZZ/101
 R = kk[a,b,c]
 ans = matrix {{a+b+c, a*b+a*c+b*c, a*b*c, a*b^2+a^2*c+b*c^2, a*b^3+a^3*c+b*c^3, a*b^4+a^4*c+b*c^4, a*b^5+a^5*c+b*c^5, a*b^6+a^6*c+b*c^6, a*b^7+a^7*c+b*c^7, a*b^8+a^8*c+b*c^8, a*b^9+a^9*c+b*c^9, a*b^10+a^10*c+b*c^10, a*b^11+a^11*c+b*c^11, a*b^12+a^12*c+b*c^12, a*b^13+a^13*c+b*c^13, a*b^14+a^14*c+b*c^14}}
@@ -340,16 +302,12 @@ assert(
      time subalgebraBasis(F,Limit=>15)
      ==
      ans)
-assert(
-     time subalgebraBasis(F,Limit=>15, Strategy=>Engine)
-     ==
-     ans)
 ///
+-------------------------------------------
 
--- 13)
 
+-- 12) Invariants of A^1, with a nilpotent action on A^5
 TEST ///
---Invariants of A^1, with a nilpotent action on A^5
 x = symbol x
 kk = ZZ/101
 R = kk[t,x_1..x_5, MonomialOrder=>Lex, Degrees=>{1,5,4,3,2,1}]
@@ -363,17 +321,12 @@ assert(
     time subalgebraBasis(F,Limit=>30)
     ==
     ans)
-assert(
-    time subalgebraBasis(F,Limit=>30,Strategy=>Engine)
-    ==
-    ans)
 ///
 --------------------------------------------
 
--- 14)
 
+-- 13) Invariants of A^1, with a nilpotent action on A^3
 TEST ///
---Invariants of A^1, with a nilpotent action on A^3
 x = symbol x;
 t = symbol t;
 kk = ZZ/101
@@ -387,17 +340,12 @@ assert(
      time subalgebraBasis(F,Limit=>200)
      ==
      ans)
-assert(
-     time subalgebraBasis(F,Limit=>200,Strategy=>Engine)
-     ==
-     ans)
 ///
 --------------------------------------------
 
--- 15)
 
+-- 14) invariants of SL_2 on V + V + Sym^2(V)
 TEST ///
---invariants of SL_2 on V + V + Sym^2(V)
 u = symbol u;
 v = symbol v;
 s = symbol s;
@@ -413,75 +361,16 @@ assert(
      time subalgebraBasis(F,Limit=>30)
      ==
      ans)
-assert(
-     time subalgebraBasis(F,Limit=>30,Strategy=>Engine)
-     ==
-     ans)
 ///
---------------------------------------------
-end
---------------------------------------------
+------------------------------------------------
 
--- 16)
 
-TEST ///
--- What is the answer supposed to be??  Which ring to use?
---Invariants of A^1, with a nilpotent action on A^4
-x = symbol x
-kk = ZZ/101
-R = kk[t,x_1 .. x_4, MonomialOrder => Lex]
-R = kk[t,x_1..x_4, MonomialOrder=>Lex, Degrees=>{1,4,3,2,1}]
-R = kk[t,x_1..x_4, MonomialOrder=>ProductOrder{1,4}, Degrees=>{1,4,3,2,1}]
-F = matrix{{x_4, 
-	  t*x_4+x_3, 
-	  t^2*x_4+2*t*x_3+2*x_2, 
-	  t^3*x_4+3*t^2*x_3+6*t*x_2+6*x_1}}
-time sagbi(F,Limit=>30)
+-------------------------------------------------------
+-- Commented out: takes too long right now ~12 seconds
+-------------------------------------------------------
+
+-- invariants of A3 to degree 30
 ///
---------------------------------------------
-
--- 17)
-
-TEST ///
--- The following runs out of memory...
---Invariants of A^1, with a nilpotent action on A^6
-x = symbol x
-kk = ZZ/101
-R = kk[t,x_1..x_6, MonomialOrder=>Lex, Degrees=>{1,6,5,4,3,2,1}]
-F = matrix{{x_6, 
-	  t*x_6+x_5, 
-	  t^2*x_6+2*t*x_5+2*x_4, 
-	  t^3*x_6+3*t^2*x_5+6*t*x_4+6*x_3,
-	  t^4*x_6+4*t^3*x_5+12*t^2*x_4+24*t*x_3+24*x_2,
-	  t^5*x_6+5*t^4*x_5+20*t^3*x_4+60*t^2*x_3+120*t*x_2+120*x_1}}
-time sagbi(F,Limit=>30)
-///
---------------------------------------------
-TEST ///
-///
-
-end --
-
-These tests take too long and are removed until we know what to do with them.
-
-TEST ///
--- 'symmetric' quadratic artin ideal in 2x3 variables
-kk = ZZ/101
-R = kk[symbol a..symbol f]
-F = mingens ((ideal(a,b,c))^2 + (ideal(d,e,f))^2 + (ideal(a+d,b+e,c+f))^2)
-ans = matrix {{f^2, e*f, d*f, c*f, e^2, d*e, c*e+b*f, b*e, d^2, c*d+a*f, b*d+a*e, a*d, c^2, b*c, a*c, b^2, a*b, a^2, b*f^3, a*f^3, a*e*f^2, a*e^2*f, b^3*f, a*b^2*f, a^2*b*f, a^3*f, a*e^3, a^3*e}}
-assert(
-     time subalgebraBasis(F,Limit=>100,PrintLevel=>1)
-     ==
-     ans)
-assert(
-     time subalgebraBasis(F,Limit=>100,Strategy=>Engine, PrintLevel=>1)
-     ==
-     ans)
-///
-
-TEST ///
---invariants of A3, to degree 30
 kk = ZZ/101
 R = kk[a,b,c]
 ans = matrix {{a+b+c, a*b+a*c+b*c, a*b*c, a*b^2+a^2*c+b*c^2, a*b^3+a^3*c+b*c^3, a*b^4+a^4*c+b*c^4, a*b^5+a^5*c+b*c^5, a*b^6+a^6*c+b*c^6, a*b^7+a^7*c+b*c^7, a*b^8+a^8*c+b*c^8, a*b^9+a^9*c+b*c^9, a*b^10+a^10*c+b*c^10, a*b^11+a^11*c+b*c^11, a*b^12+a^12*c+b*c^12, a*b^13+a^13*c+b*c^13, a*b^14+a^14*c+b*c^14, a*b^15+a^15*c+b*c^15, a*b^16+a^16*c+b*c^16, a*b^17+a^17*c+b*c^17, a*b^18+a^18*c+b*c^18, a*b^19+a^19*c+b*c^19, a*b^20+a^20*c+b*c^20, a*b^21+a^21*c+b*c^21, a*b^22+a^22*c+b*c^22, a*b^23+a^23*c+b*c^23, a*b^24+a^24*c+b*c^24, a*b^25+a^25*c+b*c^25, a*b^26+a^26*c+b*c^26, a*b^27+a^27*c+b*c^27, a*b^28+a^28*c+b*c^28, a*b^29+a^29*c+b*c^29}}
@@ -490,10 +379,57 @@ assert(
      time subalgebraBasis(F,Limit=>30)
      ==
      ans)
-assert(
-     time subalgebraBasis(F,Limit=>30,Strategy=>Engine)
-     ==
-     ans)
 ///
+--------------------------------------------------
+
+
+-- 15) invariants of A^1, with a nilpotent action of A^4
+TEST ///
+x = symbol x
+kk = ZZ/101
+R = kk[t,x_1..x_4, MonomialOrder=>Lex, Degrees=>{1,4,3,2,1}]
+F = matrix{{x_4, 
+	  t*x_4+x_3, 
+	  t^2*x_4+2*t*x_3+2*x_2, 
+	  t^3*x_4+3*t^2*x_3+6*t*x_2+6*x_1}}
+ans = matrix {{x_4, t*x_4+x_3, t^2*x_4+2*t*x_3+2*x_2, x_2*x_4+50*x_3^2, t^3*x_4+3*t^2*x_3+6*t*x_2+6*x_1, t*x_2*x_4+50*t*x_3^2-49*x_1*x_4+50*x_2*x_3, x_1*x_4^2-x_2*x_3*x_4+34*x_3^3,
+      t^2*x_2*x_4+50*t^2*x_3^2+3*t*x_1*x_4-t*x_2*x_3+3*x_1*x_3-2*x_2^2, t*x_1*x_4^2-t*x_2*x_3*x_4+34*t*x_3^3+x_1*x_3*x_4-35*x_2^2*x_4+34*x_2*x_3^2,
+      t^2*x_1*x_4^2-t^2*x_2*x_3*x_4+34*t^2*x_3^3+2*t*x_1*x_3*x_4+31*t*x_2^2*x_4-33*t*x_2*x_3^2-2*x_1*x_2*x_4+2*x_1*x_3^2+33*x_2^2*x_3,
+      t^3*x_1*x_4^2-t^3*x_2*x_3*x_4+34*t^3*x_3^3+3*t^2*x_1*x_3*x_4-4*t^2*x_2^2*x_4+t^2*x_2*x_3^2-6*t*x_1*x_2*x_4+6*t*x_1*x_3^2-2*t*x_2^2*x_3-6*x_1^2*x_4+6*x_1*x_2*x_3+31*x_2^3,
+      x_1^2*x_4^2-2*x_1*x_2*x_3*x_4-33*x_1*x_3^3-44*x_2^3*x_4-34*x_2^2*x_3^2}}
+assert(
+    time (subalgebraBasis(F,Limit=>30))
+    ==
+    ans)
+///
+----------------------------------------------------
+
+
+-- 16) elimination order on ambient ring
+TEST ///
+BaseRing = QQ[y, x, MonomialOrder=>{Eliminate 1, GRevLex}]
+F = matrix{{x, x*y-y^2, x*y^2}}
+ans = matrix {{x, y^2-y*x, y*x^2}}
+assert(
+    time subalgebraBasis(F,Limit=>1000)
+    == ans)
+///
+-----------------------------------------------------
+
+
+-- 17) 'symmetric' quadratic artin ideal in 2x3 variables
+TEST ///
+R = kk[symbol a..symbol f]
+F = mingens ((ideal(a,b,c))^2 + (ideal(d,e,f))^2 + (ideal(a+d,b+e,c+f))^2)
+ans = matrix {{f^2, e*f, d*f, c*f, e^2, d*e, c*e+b*f, b*e, d^2, c*d+a*f, b*d+a*e, a*d, c^2, b*c, a*c, b^2, a*b, a^2, b*f^3, a*f^3, a*e*f^2, a*e^2*f, b^3*f, a*b^2*f, a^2*b*f, a^3*f, a*e^3, a^3*e}}
+assert(
+    time subalgebraBasis(F,Limit=>100) 
+    == 
+    ans)
+///
+----------------------------------------------------
+
+
+end
 
 
