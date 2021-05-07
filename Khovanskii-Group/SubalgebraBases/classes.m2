@@ -245,7 +245,7 @@ RingElement // Subring := (f, A) -> (
 
 -- Sends each entry e to e%A
 Matrix % Subring := (M, A) -> (
-    pres := A#"PresRing";
+    pres := A#"presentation";
     ents := for i from 0 to numrows M - 1 list(
 	for j from 0 to numcols M - 1 list(M_(i,j) % A)
 	);

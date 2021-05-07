@@ -2,24 +2,33 @@
 newPackage(
 	"SubalgebraBases",
 	AuxiliaryFiles => true,
-    	Version => "0.1",
-    	Date => "November 24, 2006",
-    	Authors => {{Name => "Mike Stillman",
-		  Email => "mike@math.cornell.edu",
-		  HomePage => "http://www.math.cornell.edu/~mike/"}},
+    	Version => "1.0",
+    	Date => "May 2021",
+    	Authors => {
+	    {Name => "Michael Burr",
+	     Email => "burr2@clemson.edu",
+	     HomePage => "https://cecas.clemson.edu/~burr2/"},
+	    {Name => "Oliver Clarke",
+	     Email => "oc17371@bristol.ac.uk",
+	     HomePage => "https://research-information.bris.ac.uk/en/persons/ollie-clarke"},
+	    {Name => "Timothy Duff",
+	     Email => "tduff3@gatech.edu",
+	     HomePage => "https://timduff35.github.io/timduff35/"},
+	    {Name => "Jackson Leaman"},
+	    {Name => "Nathan Nichols"},
+	    {Name => "Elise Walker",
+	     Email => "elise.walker@tamu.edu",
+	     HomePage => "https://sites.google.com/view/elise-walker/home"},
+	    {Name => "Legacy author: Mike Stillman",
+	     Email => "mike@math.cornell.edu",
+	     HomePage => "http://www.math.cornell.edu/~mike/"},
+	    {Name => "Legacy author: Harrison Tsai"}
+	    },
     	Headline => "Canonical subalgebra bases (aka SAGBI/Khovanskii bases)",
 	AuxiliaryFiles => true, -- set to true if package comes with auxiliary files
   	DebuggingMode => true -- set to true only during development
     	)
 exportMutable {}
-
--*
--- old code!
---load "SubalgebraBases/sagbi-common.m2"
---load "SubalgebraBases/sagbitop.m2"
---load "SubalgebraBases/sagbieng.m2"
---load "SubalgebraBases/sagbi-tests.m2"
-*-
 
 needs "./SubalgebraBases/classes.m2"
 needs "./SubalgebraBases/service-functions.m2"
