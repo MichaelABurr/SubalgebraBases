@@ -92,8 +92,8 @@ gens SAGBIBasis := o -> S -> (
     if #flatten entries S#"sagbiGenerators" == 0 then S#"subringGenerators"
     else if S#"sagbiDone" then (S#"sagbiGenerators")
     else (
-        << "The subring generators should be subducted by the sagbi generators.  This is not yet implemented";
-        S#"subringGenerators" | S#"sagbiGenerators"
+    	  reducedGenerators := compress subduction(S#"sagbiGenerators",S#"subringGenerators");
+	  S#"sagbiGenerators" | reducedGenerators
     )
 )
 
@@ -211,32 +211,32 @@ makePresRing(Subring) := opts -> subR -> (
 -- Old things, to be edited.
 
 -- f % Subring is never going to be an element of the subalgebra, hence the ouput
--- is in the lower variables of TensorRing.
--- input: f in ambient A or TensorRing of A.
--- output: r in TensorRing of A such that f = a + r w/ a in A, r "minimal"
+-- is in the lower variables of tensorRing.
+-- input: f in ambient A or tensorRing of A.
+-- output: r in tensorRing of A such that f = a + r w/ a in A, r "minimal"
 RingElement % Subring := (f, A) -> (
-    pres := A#"PresRing";
+    pres := A#"presentation";
     if ring f === ambient A then(
-	f = (pres#"InclusionBase")(f);
-	) else if ring f =!= pres#"TensorRing" then(
-	error "The RingElement f must be in either TensorRing or ambient A.";
+	f = (pres#"inclusionAmbient")(f);
+	) else if ring f =!= pres#"tensorRing" then(
+	error "The RingElement f must be in either tensorRing or ambient A.";
 	);
-    ans := (internalSubduction(A, f));
+    ans := (internalSubduction(pres, f));
     ans
     );
 
 -- f // Subring is always going to be inside of the subalgebra, hence the output
--- should be in the upper variables of TensorRing.
+-- should be in the upper variables of tensorRing.
 -- NOTE: If you want to compute FullSub(f//A), it is a lot faster to compute f-(f%A).
--- input: f in ambient A or TensorRing of A.
--- output: a in TensorRing of A such that f = a + r w/ a in A, r "minimal."
+-- input: f in ambient A or tensorRing of A.
+-- output: a in tensorRing of A such that f = a + r w/ a in A, r "minimal."
 RingElement // Subring := (f, A) -> (
     pres := A#"PresRing";
-    tense := pres#"TensorRing";
+    tense := pres#"tensorRing";
     if ring f === ambient A then(
 	f = (pres#"InclusionBase")(f);
 	) else if ring f =!= tense then(
-	error "The RingElement f must be in either the TensorRing or ambient ring of A.";
+	error "The RingElement f must be in either the tensorRing or ambient ring of A.";
 	);
     result := f - (f % A);
     I := pres#"LiftedPres";
@@ -249,7 +249,7 @@ Matrix % Subring := (M, A) -> (
     ents := for i from 0 to numrows M - 1 list(
 	for j from 0 to numcols M - 1 list(M_(i,j) % A)
 	);
-    matrix(pres#"TensorRing", ents)
+    matrix(pres#"tensorRing", ents)
     );
 
 -- Sends each entry e to e//A
@@ -258,12 +258,12 @@ Matrix // Subring := (M, A) -> (
     ents := for i from 0 to numrows M - 1 list(
 	for j from 0 to numcols M - 1 list(M_(i,j) // A)
 	);
-    matrix(pres#"TensorRing", ents)
+    matrix(pres#"tensorRing", ents)
     );
 
 -- Returns the tensor ring because the function ambient returns the ambient ring.
 ring Subring := A -> (
-A#"PresRing"#"TensorRing"
+A#"PresRing"#"tensorRing"
 );
 
 end---Michael
@@ -329,7 +329,7 @@ net Subring := A -> "subring of " | toString(ambient A)
 PresRing = new Type of HashTable
 
 net PresRing := pres -> (    
-    tense := pres#"TensorRing";
+    tense := pres#"tensorRing";
     A := numcols vars tense;
     B := numcols selectInSubring(1, vars tense);
     "PresRing instance ("|toString(B)|" generators in "|toString(A-B)|" variables)"
@@ -372,34 +372,34 @@ makePresRing(Ring, List) := opts -> (R, gensR) ->(
         MonomialOrder => newOrder
 	];
         
-    TensorRing := CoeffField NewVariables;
+    tensorRing := CoeffField NewVariables;
     
-    assert(heft TensorRing =!= null);	    
+    assert(heft tensorRing =!= null);	    
         
-    ProjectionInclusion := map(TensorRing, TensorRing,
-        (matrix {toList(nBaseGens:0_(TensorRing))}) |
-	(vars TensorRing)_{nBaseGens .. nBaseGens+nSubalgGens-1});
+    ProjectionInclusion := map(tensorRing, tensorRing,
+        (matrix {toList(nBaseGens:0_(tensorRing))}) |
+	(vars tensorRing)_{nBaseGens .. nBaseGens+nSubalgGens-1});
     
-    ProjectionBase := map(ambR, TensorRing,
+    ProjectionBase := map(ambR, tensorRing,
         (vars ambR) | matrix {toList(nSubalgGens:0_(ambR))});
     
-    InclusionBase := map(TensorRing, ambR,
-        (vars TensorRing)_{0..nBaseGens-1});
+    InclusionBase := map(tensorRing, ambR,
+        (vars tensorRing)_{0..nBaseGens-1});
     
-    Substitution := map(TensorRing, TensorRing,
-        (vars TensorRing)_{0..nBaseGens-1} | InclusionBase(matrix({gensR})));
+    Substitution := map(tensorRing, tensorRing,
+        (vars tensorRing)_{0..nBaseGens-1} | InclusionBase(matrix({gensR})));
     	
     SyzygyIdeal := ideal(
-        (vars TensorRing)_{nBaseGens..nBaseGens+nSubalgGens-1}-
+        (vars tensorRing)_{nBaseGens..nBaseGens+nSubalgGens-1}-
 	InclusionBase(leadTerm matrix({gensR})));
     
     submap := Substitution;
-    genVars := (vars TensorRing)_{numgens ambient R..numgens TensorRing-1};
+    genVars := (vars tensorRing)_{numgens ambient R..numgens tensorRing-1};
     liftedPres := ideal(submap(genVars) - genVars);
     FullSub := ProjectionBase*Substitution;
      
     ht := new HashTable from {
-	"TensorRing" => TensorRing,
+	"tensorRing" => tensorRing,
 	"ProjectionInclusion" => ProjectionInclusion,
 	"ProjectionBase" => ProjectionBase,
 	"InclusionBase" => InclusionBase,
