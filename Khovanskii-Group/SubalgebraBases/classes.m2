@@ -75,8 +75,7 @@ sagbiBasis Subring := {limit => 100} >> opts -> S -> (
 
 sagbiBasis MutableHashTable := {storePending => true, VarBaseName => "p"} >> opts -> H -> (
     stopping := new HashTable from {"limit" => H#"stoppingData"#"limit", "degree" => H#"stoppingData"#"degree"};
-    -- pending := if opts.storePending then new HashTable from H#"pending" else new HashTable; -- Introduce this after the first pass
-    pending := new HashTable from H#"pending";
+    pending := if opts.storePending then new HashTable from H#"pending" else new HashTable;
     new SAGBIBasis from {
         "ambientRing" => H#"ambientRing",
         "subringGenerators" => H#"subringGenerators",

@@ -143,14 +143,12 @@ sagbi(SAGBIBasis) := o -> S -> (
     	compTable#"subringGenerators" = autosubduce compTable#"subringGenerators";
     );
     
-    if #compTable#"pending" == 0 then (
+    if (numcols compTable#"sagbiGenerators" == 0) or (not o.storePending) then (
     	insertPending(compTable, compTable#"subringGenerators");
+        -- Remove elements of coefficient ring
+        remove(compTable#"pending", 0);
+        compTable#"stoppingData"#"degree" = processPending(compTable) + 1;
     	);
-
-    -- Remove elements of coefficient ring
-    remove(compTable#"pending", 0);
-    
-    compTable#"stoppingData"#"degree" = processPending(compTable) + 1;
 
     local subducted;
     local newElements;
