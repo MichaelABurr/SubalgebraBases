@@ -103,9 +103,10 @@ sagbi = method(
     TypicalValue => Subring, 
     Options => {
     	Strategy => null,
-	Autosubduce => true,
+	    Autosubduce => true,
     	Limit => 100,
-    	PrintLevel => 0
+    	PrintLevel => 0,
+        storePending => true
     	}
     );
 
@@ -132,6 +133,8 @@ sagbi(SAGBIBasis) := o -> S -> (
     compTable := new MutableHashTable from S;
     compTable#"pending" = new MutableHashTable from compTable#"pending";
     compTable#"stoppingData" = new MutableHashTable from compTable#"stoppingData";
+
+    if (compTable#"stoppingData"#"degree" > o.Limit) or compTable#"sagbiDone" then return S;
     
     if o.Autosubduce then(
 	if o.PrintLevel > 0 then (
@@ -149,104 +152,100 @@ sagbi(SAGBIBasis) := o -> S -> (
     
     compTable#"stoppingData"#"degree" = processPending(compTable) + 1;
 
+    local subducted;
+    local newElements;
+    local pres;
+    local sagbiGB;
+    local zeroGens;
+    local syzygyPairs;
+    local terminationCondition0;
+    local terminationCondition1;
+    local terminationCondition2;
+
     while compTable#"stoppingData"#"degree" <= o.Limit and not compTable#"sagbiDone" do (  	
 	if o.PrintLevel > 0 then (
 	    print("---------------------------------------");
 	    print("-- Current degree:"|toString(compTable#"stoppingData"#"degree"));
 	    print("---------------------------------------");
 	    );
-     
-	pres := makePresRing(compTable#"ambientRing", compTable#"sagbiGenerators");
 	
     	if o.PrintLevel > 0 then (
     	    print("-- Computing the kernel of the substitution homomorphism to the initial algebra...");
 	    );
-	sagbiGB := gb(pres#"syzygyIdeal", DegreeLimit => compTable#"stoppingData"#"degree"); 
-	zeroGens := submatByDegree(mingens ideal selectInSubring(1, gens sagbiGB), compTable#"stoppingData"#"degree");
-	syzygyPairs := pres#"substitution"(zeroGens);
-	
-	break; 
-	);
-    	(compTable, sagbiGB, zeroGens, syzygyPairs)
-	);
-    	
-	--this is where we are as of 3/26/21
-	
-    	end--
-	
+    sagbiGB = gb(compTable#"presentation"#"syzygyIdeal", DegreeLimit => compTable#"stoppingData"#"degree");
+	zeroGens = submatByDegree(mingens ideal selectInSubring(1, gens sagbiGB), compTable#"stoppingData"#"degree");
+	syzygyPairs = compTable#"presentation"#"substitution"(zeroGens);
+
 	-- Have we previously found any syzygies of degree currDegree?
-        if subalgComp#"pending"#?(compTable#"stoppingData"#"degree") then (
-            syzygyPairs = syzygyPairs | pres#"inclusionAmbient"(matrix{subalgComp#"pending"#(compTable#"stoppingData"#"degree")});
-            remove(subalgComp#"pending", compTable#"stoppingData"#"degree");
+        if compTable#"pending"#?(compTable#"stoppingData"#"degree") then (
+            syzygyPairs = syzygyPairs |
+                compTable#"presentation"#"inclusionAmbient"(matrix{toList compTable#"pending"#(compTable#"stoppingData"#"degree")});
+            remove(compTable#"pending", compTable#"stoppingData"#"degree");
             );
-	
+
 	if o.PrintLevel > 0 then(
     	    print("-- Performing subduction on S-polys... ");
-	    print("-- Num. S-polys before subduction:"|toString(numcols syzygyPairs));
-	    );
-	
-       	subd := internalSubduction(partialSagbi, syzygyPairs);
-	
-	local newElems;
-       	if entries subd != {{}} then (
-	    newElems = compress ((pres#"ProjectionBase")(subd));
-            ) else (
-	    newElems = subd;
-	    );
-	
-	if o.PrintLevel > 0 then(
-	    print("-- Num. S-polys after subduction:"|toString(numcols newElems));
-	    );	
-	
-	if o.PrintLevel > 1 then(
-	    print("-- New generators:");
-	    if(numcols newElems == 0) then(
-		-- It has to treat this as a special case because zero matrices are special. 
-		print("| 0 |");
-		)else(
-		debugPrintMat(newElems);
-		);
+	        print("-- Num. S-polys before subduction: " | toString(numcols syzygyPairs));
 	    );
 
-	if numcols newElems > 0 then (	    
-	    insertPending(R, newElems, o.Limit);
-    	    processPending(R, o.Limit);
-	    currDegree = subalgComp#"CurrentLowest";   
+    subducted = internalSubduction(compTable#"presentation", syzygyPairs);
+
+    if numcols subducted != 0 then (
+	    newElements = compress ((compTable#"presentation"#"projectionAmbient")(subducted));
             ) else (
-	    
-	    C0 := sum toList apply(subalgComp#"Pending", i -> #i) == 0;
-	    C1 := rawStatus1 raw sagbiGB == 6;
-	    C2 := currDegree > maxGensDeg; 
-	    
-	    if o.PrintLevel > 0 then(
+	    newElements = subducted;
+	    );
+
+	if o.PrintLevel > 0 then(
+	    print("-- Num. S-polys after subduction: " | toString(numcols newElements));
+	    );
+
+	if o.PrintLevel > 1 then(
+	    print("-- New generators:");
+	    if(numcols newElements == 0) then(
+		-- It has to treat this as a special case because zero matrices are special.
+		    print("| 0 |");
+		    )else(
+		    debugPrintMat(newElements);
+		    );
+        );
+
+	if numcols newElements > 0 then (
+	    insertPending(compTable, newElements);
+    	    processPending(compTable);
+	    if not lowestDegree(compTable) == infinity then 
+                 compTable#"stoppingData"#"degree" = lowestDegree(compTable)
+                 else
+                 compTable#"stoppingData"#"degree" = compTable#"stoppingData"#"degree" + 1;
+        ) else (
+
+        terminationCondition0 = #(compTable#"pending") == 0;
+        terminationCondition1 = rawStatus1 raw sagbiGB == 6;
+        terminationCondition2 = compTable#"stoppingData"#"degree" > max flatten (degrees compTable#"subringGenerators")_1;
+
+        if o.PrintLevel > 0 then(
 		print("-- No new generators found. ");
 		print("-- Stopping conditions:");
-		print("--    No higher degree candidates: "|toString(C0));
-		print("--    S-poly ideal GB completed:   "|toString(C1));
-		print("--    Degree lower bound:          "|toString(C2));
+		print("--    No higher degree candidates: "|toString(terminationCondition0));
+		print("--    S-poly ideal GB completed:   "|toString(terminationCondition1));
+		print("--    Degree lower bound:          "|toString(terminationCondition2));
 		);
-	    
-	    if C0 and C1 and C2 then (
-		R.cache.SagbiDone = true;
-            	);
-	    );
-	currDegree = currDegree + 1;
-    	);
+
+        if terminationCondition0 and terminationCondition1 and terminationCondition2 then (
+            compTable#"sagbiDone" = true;
+            );
+	
+        compTable#"stoppingData"#"degree" = compTable#"stoppingData"#"degree" + 1;
+        );
     
-    if currDegree > o.Limit then(
-	isPartial = true;
-	);
-    -- Possibly, it could finish on the same loop that it successfully terminates.
-    if R.cache.SagbiDone == true then(
-	isPartial = false;
-	);
+    );
     
     if o.PrintLevel > 0 then(
-    	if currDegree > o.Limit then (
-	    print("-- Limit was reached before a finite SAGBI basis was found.");
+    	if not compTable#"sagbiDone" then (
+            print("-- Limit was reached before a finite SAGBI basis was found.");
     	    )else(
-	    print("-- Finite Sagbi basis was found.");
-	    );
+            print("-- Finite Sagbi basis was found.");
+            );
     	);
     
     -- We return a new instance of subring instead of the generators themselves so that we can say whether or not a Subring instance
@@ -262,26 +261,6 @@ sagbi(SAGBIBasis) := o -> S -> (
     -----------------------------------------------------------------------------------------------------
     -- The correct way to implement a function that requires a Subring instance that is a Sagbi basis is to check that 
     -- (subR.isSagbi == true). If (subR.isSagbi == false) and (subR.cache.SagbiDone == true), an error should still be thrown.
-        
-    resultR := ambient R;
-    M := R.cache.SagbiGens;
-    presRing := makePresRing(resultR, M);
     
-    -- It shouldn't directly set (cache => R.cache) because there is a possibility of inhereting outdated information.
-    -- (It can't assume that outside sources haven't modified the cache.) 
-    cTable := new CacheTable from{
-	SubalgComputations => new MutableHashTable from {},
-	SagbiGens => M,
-	SagbiDegrees => R.cache.SagbiDegrees,
-	SagbiDone => R.cache.SagbiDone
-	}; 
-    new Subring from {
-    	"AmbientRing" => resultR,
-    	"Generators" => M,
-	"PresRing" => presRing,
-    	"isSagbi" => R.cache.SagbiDone,
-	"isPartialSagbi" => isPartial,
-	"partialDegree" => currDegree-1,
-	cache => cTable
-	}
-    );
+    sagbiBasis(storePending => o.storePending,compTable)
+);

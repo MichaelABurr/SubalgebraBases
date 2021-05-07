@@ -59,7 +59,7 @@ SAGBIBasis = new Type of HashTable
 
 sagbiBasis = method(Options => true)
 sagbiBasis Subring := {limit => 100} >> opts -> S -> (
-    stopping := new HashTable from {"limit" => opts.limit, "degree" => -1, "maximum" => -1};
+    stopping := new HashTable from {"limit" => opts.limit, "degree" => -1};
     pending := new HashTable;
     new SAGBIBasis from {
         "ambientRing" => ambient S,
@@ -73,19 +73,19 @@ sagbiBasis Subring := {limit => 100} >> opts -> S -> (
     }
 )
 
-sagbiBasis (Subring, MutableHashTable) := {storePending => true} >> opts -> (S,H) -> (
-    stopping := new HashTable from {"limit" => H#"limit", "degree" => H#"degree", "maximum" => H#"maximum"};
+sagbiBasis MutableHashTable := {storePending => true, VarBaseName => "p"} >> opts -> H -> (
+    stopping := new HashTable from {"limit" => H#"stoppingData"#"limit", "degree" => H#"stoppingData"#"degree"};
     -- pending := if opts.storePending then new HashTable from H#"pending" else new HashTable; -- Introduce this after the first pass
     pending := new HashTable from H#"pending";
     new SAGBIBasis from {
-        "ambientRing" => ambient S,
-        "subringGenerators" => gens S,
-        "sagbiGenerators" => H#"gens",
-        "sagbiDegrees" => H#"degs",
-        "sagbiDone" => H#"done",
+        "ambientRing" => H#"ambientRing",
+        "subringGenerators" => H#"subringGenerators",
+        "sagbiGenerators" => H#"sagbiGenerators",
+        "sagbiDegrees" => H#"sagbiDegrees",
+        "sagbiDone" => H#"sagbiDone",
         "stoppingData" => stopping,
         "pending" => pending,
-        "presentation" => makePresRing(opts, ambient S, H#"gens")
+        "presentation" => makePresRing(VarBaseName => opts.VarBaseName, H#"ambientRing", H#"sagbiGenerators")
     }
 )
 
@@ -183,6 +183,7 @@ makePresRing(Ring, List) := opts -> (R, gensR) ->(
     genVars := (vars tensorRing)_{numgens ambient R..numgens tensorRing-1};
 
     syzygyIdeal := ideal(genVars - inclusionAmbient(leadTerm matrix({gensR})));
+    
 
     liftedPres := ideal(substitution(genVars) - genVars);
     fullSubstitution := projectionAmbient*substitution;
