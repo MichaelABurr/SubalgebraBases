@@ -3,6 +3,7 @@ undocumented {
     -- These are basically self-explanatory
     (net, PresRing),
     (net, Subring),
+    (net, SAGBIBasis),
     -- These are only used as keys in the cache, which end users aren't intended to use.
     -- They should be replaced by strings in the future, but this isn't very important.
     SagbiGens,
@@ -10,6 +11,8 @@ undocumented {
     SagbiDegrees,
     SubalgComputations,
     insertPending,
+    VarBaseName,
+    storePending
     }
 
 doc ///
@@ -50,8 +53,36 @@ doc ///
      (subalgebraBasis,Subring)
      (subalgebraBasis, Matrix)
      (subalgebraBasis, List)
+    [subalgebraBasis,Limit]
+    [subalgebraBasis,PrintLevel]
+    [subalgebraBasis,Strategy]
+    [subalgebraBasis,Autosubduce]
    Headline
      subalgebra basis (sagbi basis) generators
+   Usage
+     N = subalgebraBasis M
+     N = subalgebraBasis A
+     N = subalgebraBasis L
+     N = subalgebraBasis B
+   Inputs
+     A:Subring
+     M:Matrix
+       of generators for a subring of @ ofClass{PolynomialRing} @
+     L:List
+       containing generators for a subring of @ ofClass{PolynomialRing} @
+     B:SAGBIBasis
+        containing a partial computation of a sagbi basis
+     Limit=>ZZ
+       a degree limit for the binomial S-pairs that are computed internally.
+     PrintLevel=>ZZ
+       When this is greater than zero, information is printed about the progress of the computation (See: @TO "PrintLevel"@)
+     Strategy=>String
+       not currently used
+     Autosubduce=>Boolean
+       Whether to perform autosubduction on the generators before performing the Sagbi basis computation (See: @TO "Autosubduce"@)
+   Outputs
+     N:Matrix
+       whose entries form a partial subalgebra basis
    Description
      Text
        The command @TT "subalgebraBasis A"@ is equivalent to the command @TT "gens sagbi A"@.
@@ -70,10 +101,7 @@ doc ///
      [sagbi,PrintLevel]
      [sagbi,Strategy]
      [sagbi,Autosubduce]
-     [subalgebraBasis,Limit]
-     [subalgebraBasis,PrintLevel]
-     [subalgebraBasis,Strategy]
-     [subalgebraBasis,Autosubduce]
+     [sagbi,storePending]
    Headline
      subalgebra basis (sagbi basis)
    Usage
@@ -97,9 +125,10 @@ doc ///
        not currently used
      Autosubduce=>Boolean
        Whether to perform autosubduction on the generators before performing the Sagbi basis computation (See: @TO "Autosubduce"@)
+     storePending=>Boolean
    Outputs
-     N:Matrix
-       whose entries form a partial subalgebra basis
+     N:SAGBIBasis
+       a computation object holding the state of the sagbi basis computation
    Description
     Text
         The output of this function is a partial subalgebra basis. This is unavoidable, since a subalgebra of a polynomial ring, endowed with some polynomial order, need not have a finite subalgebra basis.
@@ -633,6 +662,7 @@ doc ///
      (makePresRing, Ring, Matrix)
      (makePresRing, Ring, List)
      (makePresRing, Subring)
+     [makePresRing, VarBaseName]
    Headline
      Contstructs an instance of the PresRing type
    Usage
@@ -645,6 +675,8 @@ doc ///
      	 A list of subring generators.
      gensMat:Matrix
      	 A one-row matrix of generators.
+     VarBaseName => String
+        Determines the symbol used for the variables of the @TT "tensorRing"@ of the resulting @TO "Subring"@ instance.
    Outputs
      result:PresRing
     	An instance of PresRing
@@ -1171,9 +1203,7 @@ doc ///
      (subring, List)
      (subring, Matrix)
      (subring, SAGBIBasis)
-     VarBaseName
      [subring, VarBaseName]
-     [makePresRing, VarBaseName]
    Headline
      Constructs a subring of a polynomial ring.
    Usage
@@ -1341,4 +1371,36 @@ doc ///
    Description
      Text
         Returns true if the sagbi basis computation has been completed.
+///
+
+doc ///
+   Key
+     (ring,Subring)
+   Headline
+     Returns tensor ring
+   Usage
+     result = ring subR
+   Inputs
+     subR:Subring
+   Outputs
+     result:Ring
+   Description
+     Text
+        Returns the tensor ring of the subring
+///
+
+doc ///
+   Key
+     (gens,SAGBIBasis)
+   Headline
+     Returns a partial sagbi generating set
+   Usage
+     result = gens S
+   Inputs
+     S:SAGBIBasis
+   Outputs
+     result:Matrix
+   Description
+     Text
+        If there are no sagbi generators, returns the generators of the original subring.  If the sagbi computation has completed with a finite sagbi basis, returns the sagbi basis.  In any other case, subducts the generators of the original subring by the partial sagbi basis and returns both the partial sagbi basis and the result of the subduction.
 ///
