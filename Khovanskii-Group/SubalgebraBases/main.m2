@@ -17,15 +17,6 @@ subduction(Matrix, Matrix) := (M, N) -> (
     matrix({ents})
     );
 
-gens SAGBIBasis := o -> S -> (
-    if #flatten entries S#"sagbiGenerators" == 0 then S#"subringGenerators"
-    else if S#"sagbiDone" then (S#"sagbiGenerators")
-    else (
-    	  reducedGenerators := compress subduction(S#"sagbiGenerators",S#"subringGenerators");
-	  S#"sagbiGenerators" | reducedGenerators
-    )
-)
-
 internalSubduction = method(TypicalValue => RingElement)
 internalSubduction(PresRing, RingElement) := (pres, f) -> (
     tense := pres#"tensorRing";

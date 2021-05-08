@@ -79,16 +79,28 @@ sagbiBasis MutableHashTable := {storePending => true, VarBaseName => "p"} >> opt
     }
 )
 
-subring SAGBIBasis := {} >> opts -> S -> (
-    G := gens S;
-    if S#"sagbiDone" then new Subring from{
-        "ambientRing" => ring S#"sagbiGenerators",
-        "generators" => G,
-        "presentation" => makePresRing(opts, ring S#"sagbiGenerators", S#"sagbiGenerators"),
-        "isSAGBI" => true,
-        cache => new CacheTable from {}}
-    else subring G
+gens SAGBIBasis := o -> S -> (
+    if #flatten entries S#"sagbiGenerators" == 0 then S#"subringGenerators"
+    else if S#"sagbiDone" then (S#"sagbiGenerators")
+    else (
+    	  reducedGenerators := compress subduction(S#"sagbiGenerators",S#"subringGenerators");
+	  S#"sagbiGenerators" | reducedGenerators
+    )
 )
+
+subring SAGBIBasis := opts -> S -> (
+    G := gens S;
+    if S#"sagbiDone" then ( 
+    	new Subring from{
+            "ambientRing" => ring S#"sagbiGenerators",
+            "generators" => G,
+            "presentation" => makePresRing(opts, ring S#"sagbiGenerators", S#"sagbiGenerators"),
+            "isSAGBI" => true,
+            cache => new CacheTable from {}}
+    	) else (
+    	subring(opts, G)
+    	)
+    )
 
 sagbiDone = method(Options => {})
 sagbiDone SAGBIBasis := opts -> S -> S#"sagbiDone"

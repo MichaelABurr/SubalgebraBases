@@ -43,11 +43,11 @@ leadCoef(RingElement) := f ->(
 intrinsicReduce = method(TypicalValue => RingElement)
 intrinsicReduce(Subring, Matrix, RingElement) := (subR, G, p) -> (
     
-    pres := subR#"PresRing";
-    tense := pres#"TensorRing";
-    projInc := pres#"ProjectionInclusion";
+    pres := subR#"presentation";
+    tense := pres#"tensorRing";
+    projInc := pres#"sagbiInclusion";
 
-    if subR#"isSagbi" == false then(
+    if subR#"isSAGBI" == false then(
 	error "Can only use IntrinsicReduce on a Subring instance that is a Sagbi basis.";
 	);
     
@@ -62,7 +62,7 @@ intrinsicReduce(Subring, Matrix, RingElement) := (subR, G, p) -> (
         --);
     
     amb := ambient subR;
-    fullSub := pres#"FullSub";
+    fullSub := pres#"fullSubstitution";
     result := p;
     
     -- If the  === comparison is true, it  does not guarentee that will not throw an error.
@@ -74,8 +74,8 @@ intrinsicReduce(Subring, Matrix, RingElement) := (subR, G, p) -> (
     	);
    
     -- This call to sagbi will not take long.
-    KA := sagbi subring(leadTerm gens subR);
-    tenseKA := KA#"PresRing"#"TensorRing";
+    KA := subring sagbi subring(leadTerm gens subR);
+    tenseKA := KA#"presentation"#"tensorRing";
     Q := (leadTerm G)//KA;
     
     -- This is an ideal inside of the _tensor ring_ of KA.
@@ -93,8 +93,8 @@ intrinsicReduce(Subring, Matrix, RingElement) := (subR, G, p) -> (
        	if badTerms == 0 then(
 	    break;
 	    );
-	fullSubKA := KA#"PresRing"#"FullSub";
-	subMap := KA#"PresRing"#"Substitution";
+	fullSubKA := KA#"presentation"#"fullSubstitution";
+	subMap := KA#"presentation"#"substitution";
 
 	tb := fullSubKA max first entries badTerms;	
 	assert(coefficient(tb, result) != 0);
@@ -143,7 +143,7 @@ intrinsicReduce(Subring, Matrix, Matrix) := (subR, G, M) -> (
 extrinsicBuchberger = method(TypicalValue => Matrix)
 extrinsicBuchberger(Subring, Matrix) := (subR, S) -> (
     G := (gens gb (transpose (S//subR)));
-    G = subR#"PresRing"#"FullSub"(G);
+    G = subR#"presentation"#"fullSubstitution"(G);
     G = transpose compress G;
     mingensSubring(subR, G)
     );
@@ -204,28 +204,28 @@ autosubduce(Matrix) := G -> (
 toricSyz = method(TypicalValue => Matrix)
 toricSyz(Subring, Matrix) := (subR, M) -> (
     
-    pres := subR#"PresRing";
-    tense := pres#"TensorRing";
-    projInc := pres#"ProjectionInclusion";
-    fullSub := pres#"FullSub";
-    subMap := pres#"Substitution";
-    incBase := pres#"InclusionBase";
+    pres := subR#"presentation";
+    tense := pres#"tensorRing";
+    projInc := pres#"projectionAmbient";
+    fullSub := pres#"fullSubstitution";
+    subMap := pres#"substitution";
+    incBase := pres#"sagbiInclusion";
     
     amb := ambient subR;
     r := numcols M;
     
-    if subR#"isSagbi" == false then(
+    if subR#"isSAGBI" == false then(
 	error "Can only use toricSyz on a Subring instance that is a Sagbi basis.";
 	);
     if ring M === amb then(
-	M = (pres#"InclusionBase")(M);
+	M = (pres#"inclusionAmbient")(M);
 	) else if ring M =!= tense then(
 	error "The entries of M must be in either the TensorRing or ambient ring of A.";
 	);
     KA := subring leadTerm gens subR;
-    tenseKA := KA#"PresRing"#"TensorRing";
+    tenseKA := KA#"presentation"#"tensorRing";
     M = sub(M, tenseKA);    
-    M = (KA#"PresRing"#"Substitution")(M);
+    M = (KA#"presentation"#"substitution")(M);
     if leadTerm M != M then(
 	error "Expected a 1-row matrix of monomials."; 
 	); 
@@ -233,16 +233,16 @@ toricSyz(Subring, Matrix) := (subR, M) -> (
     U := M // KA;
     -- If some entry of M is not an element of KA, its normal form is zero.
     -- This will cause the assertion to fail.
-    assert(KA#"PresRing"#"Substitution"(U) == M);
+    assert(KA#"presentation"#"substitution"(U) == M);
 
     -- each column of syzU is a relation of U.
     syzU := syz U;
     special := transpose syzU;
     
     -- U is supposed to in the upper variables only. 
-    assert(KA#"PresRing"#"ProjectionInclusion" U == U);
+    assert(KA#"presentation"#"sagbiInclusion" U == U);
     
-    intersection := selectInSubring(1, gens gb intersect(ideal U, KA#"PresRing"#"LiftedPres"));    
+    intersection := selectInSubring(1, gens gb intersect(ideal U, KA#"presentation"#"liftedPres"));    
     
     binomials := for i from 0 to (numcols intersection)-1 list(
 	ent := intersection_(0,i);
@@ -253,7 +253,7 @@ toricSyz(Subring, Matrix) := (subR, M) -> (
     	coefs 
 	);
     binomials = (matrix binomials) || special;
-    fullSubKA := KA#"PresRing"#"FullSub";
+    fullSubKA := KA#"presentation"#"fullSubstitution";
     binomials = transpose compress transpose fullSubKA binomials;
     matrix entries binomials
     );
