@@ -22,7 +22,8 @@ newPackage(
 	    {Name => "Legacy author: Mike Stillman",
 	     Email => "mike@math.cornell.edu",
 	     HomePage => "http://www.math.cornell.edu/~mike/"},
-	    {Name => "Legacy author: Harrison Tsai"}
+	    {Name => "Legacy author: Harrison Tsai"},
+        {Name => "Contributors: Aaron Dall, Alessio D'Alì, Alicia Tocino, Ayah Almousa, Dharm Veer, Dipak Kumar Pradhan, Emil Sköldberg, Eriola Hoxhaj, Kriti Goel, Liđan Edin, Peter Phelan, Ritika Nair, Ilir Dema"}
 	    },
     	Headline => "Canonical subalgebra bases (aka SAGBI/Khovanskii bases)",
 	AuxiliaryFiles => true, -- set to true if package comes with auxiliary files
@@ -30,15 +31,17 @@ newPackage(
     	)
 exportMutable {}
 
+needs "./SubalgebraBases/exports.m2"
 needs "./SubalgebraBases/classes.m2"
 needs "./SubalgebraBases/service-functions.m2"
-needs "./SubalgebraBases/main.m2"
 needs "./SubalgebraBases/toric_syz.m2"
 needs "./SubalgebraBases/subring_modules.m2"
-needs "./SubalgebraBases/tests.m2"
+--needs "./SubalgebraBases/tests.m2"
 needs "./SubalgebraBases/print_util.m2"
+needs "./SubalgebraBases/main.m2"
 
 beginDocumentation()
 needs "./SubalgebraBases/documentation.m2"
+needs "./SubalgebraBases/tests.m2"
 
 end--

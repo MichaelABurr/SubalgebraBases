@@ -1,9 +1,3 @@
-export {
-    "mingensSubring",
-    "moduleToSubringIdeal",
-    "monoCoef"
-    }
-
 Subring ^ ZZ := Subring => (subR, n) -> (
     tense := subR#"PresRing"#"TensorRing";
     amb := ambient subR;

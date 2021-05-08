@@ -1,18 +1,5 @@
 debug Core -- gets rid of "raw" error during installation. probably a better way...
 
-export {
-    "internalSubduction", -- Perhaps remove internalSubduction from export list.
-    "subduction",
-    "subalgebraBasis",
-    "sagbi",
-    "PrintLevel",
-    "SagbiDegrees",
-    "SubalgComputations",
-    "SagbiGens",
-    "SagbiDone",
-    "Autosubduce"
-    }
-
 -- Performs subduction using matrix of generators, M.
 -- currently does not require the generators to be a Sagbi basis.
 
@@ -29,6 +16,15 @@ subduction(Matrix, Matrix) := (M, N) -> (
 	);
     matrix({ents})
     );
+
+gens SAGBIBasis := o -> S -> (
+    if #flatten entries S#"sagbiGenerators" == 0 then S#"subringGenerators"
+    else if S#"sagbiDone" then (S#"sagbiGenerators")
+    else (
+    	  reducedGenerators := compress subduction(S#"sagbiGenerators",S#"subringGenerators");
+	  S#"sagbiGenerators" | reducedGenerators
+    )
+)
 
 internalSubduction = method(TypicalValue => RingElement)
 internalSubduction(PresRing, RingElement) := (pres, f) -> (

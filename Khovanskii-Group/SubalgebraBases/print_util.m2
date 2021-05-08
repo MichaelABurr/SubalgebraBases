@@ -1,11 +1,3 @@
-export{
-    "debugPrintMap",
-    "debugPrintAllMaps",
-    "debugPrintGens",
-    "debugPrintMat",
-    "StrWidth"
-    }
-
 debugPrintMap = method()
 debugPrintMap(RingMap) := f -> (
     a := gens source f;

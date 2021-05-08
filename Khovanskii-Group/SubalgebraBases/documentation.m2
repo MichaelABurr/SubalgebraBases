@@ -9,6 +9,7 @@ undocumented {
     SagbiDone,
     SagbiDegrees,
     SubalgComputations,
+    insertPending,
     }
 
 doc ///
@@ -308,7 +309,7 @@ doc ///
 doc ///
    Key
      autoreduce
-     (autoreduce, Subring, Matrix)
+  --   (autoreduce, Subring, Matrix)
    Headline
      Perform autoreduction of the generators of an ideal of a subring.
    Usage
@@ -329,14 +330,13 @@ doc ///
        the function @TO "intrinsicReduce"@.
 
    SeeAlso
-     (autosubduce, Matrix)
+        autosubduce
 ///
-
 
 doc ///
    Key
      autosubduce
-     (autosubduce, Matrix)
+   --  (autosubduce, Matrix)
    Headline
      Performs autosubduction on the generators of a subring.
    Usage
@@ -352,16 +352,15 @@ doc ///
        Replaces each generator $g$ of subR with the result of subducing $g$ modulo (gens subR)$\setminus \{g\}$.
        
    SeeAlso
-     (autoreduce, Subring, Matrix)
+     autoreduce
      (internalSubduction, PresRing, RingElement)
 ///
-
 
 
 doc ///
    Key
      isSubalg
-     (isSubalg, Subring, Subring)
+--     (isSubalg, Subring, Subring)
    Headline
      Calculates whether a given subring is contained in another subring.
    Usage
@@ -385,7 +384,7 @@ doc ///
 doc ///
    Key
      leadCoef
-     (leadCoef, RingElement)
+  --   (leadCoef, RingElement)
    Headline
      Returns the coefficient of the lead monomial of f.
    Usage
@@ -439,7 +438,7 @@ doc ///
 doc ///
    Key
      mingensSubring
-     (mingensSubring, Subring, Matrix)
+  --   (mingensSubring, Subring, Matrix)
    Headline
      Given a matrix that is considered as a module over a subring, this performs autoreduction on its generators.
    Usage
@@ -459,7 +458,7 @@ doc ///
 doc ///
    Key
      moduleToSubringIdeal
-     (moduleToSubringIdeal, Subring, Matrix)
+    -- (moduleToSubringIdeal, Subring, Matrix)
    Headline
      Convert a module stored as a matrix to a subring ideal.
    Usage
@@ -486,8 +485,8 @@ doc ///
 doc ///
    Key
      subalgEquals
-     (symbol ==, Subring, Subring)
-     (subalgEquals, Subring, Subring)
+  --   (symbol ==, Subring, Subring)
+  --   (subalgEquals, Subring, Subring)
    Headline
      Check if two subring instances are mathematically equal.
    Usage
@@ -552,7 +551,7 @@ doc ///
 doc ///
    Key
      monoCoef
-     (monoCoef, RingElement, RingElement)
+ --    (monoCoef, RingElement, RingElement)
    Headline
      For polynomial @TT "p"@ and monomial @TT "m"@, extract the (possibly non-constant) "coefficient" of @TT "m"@ in @TT "p"@.
    Inputs
@@ -604,7 +603,7 @@ doc ///
 doc ///
    Key
      toricSyz
-     (toricSyz, Subring, Matrix)
+  --   (toricSyz, Subring, Matrix)
    Headline
      Calculate toric (monomial) syzygies of a set of monomials in the initial algebra.
    Inputs
@@ -627,8 +626,8 @@ doc ///
 doc ///
    Key
      intrinsicReduce
-     (intrinsicReduce, Subring, Matrix, RingElement)
-     (intrinsicReduce, Subring, Matrix, Matrix)
+  --   (intrinsicReduce, Subring, Matrix, RingElement)
+  --   (intrinsicReduce, Subring, Matrix, Matrix)
 
    Headline
      Compute normal forms relative to an ideal within a subring that has a known Sagbi basis.
@@ -658,7 +657,7 @@ doc ///
    SeeAlso
      extrinsicBuchberger
 ///
-
+-*
 doc ///
    Key
      (symbol ^, Subring, ZZ)
@@ -683,6 +682,7 @@ doc ///
    SeeAlso
      "Experimental implementation of modules over subrings"
 ///
+*-
 
 
 

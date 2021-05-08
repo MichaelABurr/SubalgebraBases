@@ -1,24 +1,3 @@
-export {
-    "Subring",
-    "subring",
-    "PresRing",
-    "makePresRing",
-    "getWeight",
-    "setWeight",
-    "presentationRing",
-    "VarBaseName",
-    "recordsagbi",
-    "sagbidone",
-    "sagbigens",
-    "sagbiring",
-    "storePending",
-    "limit",
-    "SAGBIBasis",
-    "sagbiBasis",
-    "isSagbi",
-    "sagbiDone"
-}
-
 -- Subring data type
 -- A subring is meant to be fairly light-weight.
 -- Subrings include the ambient ring, their generators
@@ -59,7 +38,7 @@ SAGBIBasis = new Type of HashTable
 
 net SAGBIBasis := S -> (
     numGens := numcols S#"sagbiGenerators";
-    sagbiLimit = S#"stoppingData"#"limit";
+    sagbiLimit := S#"stoppingData"#"limit";
     intro := null;
     if S#"sagbiDone" then (
     	intro = "SAGBIBasis Computation Object with ";
@@ -98,15 +77,6 @@ sagbiBasis MutableHashTable := {storePending => true, VarBaseName => "p"} >> opt
         "pending" => pending,
         "presentation" => makePresRing(VarBaseName => opts.VarBaseName, H#"ambientRing", H#"sagbiGenerators")
     }
-)
-
-gens SAGBIBasis := o -> S -> (
-    if #flatten entries S#"sagbiGenerators" == 0 then S#"subringGenerators"
-    else if S#"sagbiDone" then (S#"sagbiGenerators")
-    else (
-    	  reducedGenerators := compress subduction(S#"sagbiGenerators",S#"subringGenerators");
-	  S#"sagbiGenerators" | reducedGenerators
-    )
 )
 
 subring SAGBIBasis := {} >> opts -> S -> (
