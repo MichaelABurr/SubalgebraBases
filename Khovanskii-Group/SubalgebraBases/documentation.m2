@@ -51,7 +51,7 @@ doc ///
      (subalgebraBasis, Matrix)
      (subalgebraBasis, List)
    Headline
-     Does the same thing as the function @TO "sagbi"@, except returns a matrix instead of a @TT "Subring"@ instance. 
+     Does the same thing as the function "sagbi," except returns a matrix. 
    Description
      Text
        The command @TT "subalgebraBasis A"@ is equivalent to the command @TT "gens sagbi A"@.       
@@ -415,24 +415,24 @@ doc ///
    Key
      PresRing
    Headline
-     Stores maps and other information associated with the lifted presentation ring (a.k.a. "TensorRing") of a subring instance.
+     Stores maps and other information associated with the lifted presentation ring (a.k.a. "tensorRing") of a subring instance.
    Description
      Text
        This type is not intended to be used outside of the @TO "Subring"@ type. The primary reason why this is a separate type in the first place is to keep the @TO "Subring"@ type human-readable.
        Namely, the @TO "PresRing"@ type has an overloaded @TO "net"@ method that prevents @TT "(peek, Subring)"@ from flooding the screen. 
        
        The information that the @TO "PresRing"@ type contains about a @TO "Subring"@ instance is related to the @ITALIC "lifted presentation ring"@ of a subring. In the code, the
-       lifted presentation of a subring is referred to as the @TT "TensorRing"@. 
+       lifted presentation of a subring is referred to as the @TT "tensorRing"@. 
        
        
        An instance of the  @TO "PresRing"@ type contains the following keys:
        
        @UL {
 	    {BOLD {"tensorRing"}, ": The lifted presentation ring of the given subring."},
-	    {BOLD {"sagbiInclusion"}, ": A map from ", TT {"TensorRing"}, " to ", TT {"TensorRing"}},
-	    {BOLD {"projectionAmbient"},  ": A map from ", TT {"TensorRing"}, " to the ambient ring."},
-	    {BOLD {"inclusionAmbient"},  ": A map from the ambient ring to ", TT {"TensorRing"}},
-	    {BOLD {"substitution"}, ": A map from ", TT {"TensorRing"}, " to ", TT {"TensorRing"}},
+	    {BOLD {"sagbiInclusion"}, ": A map from ", TT {"tensorRing"}, " to ", TT {"tensorRing"}},
+	    {BOLD {"projectionAmbient"},  ": A map from ", TT {"tensorRing"}, " to the ambient ring."},
+	    {BOLD {"inclusionAmbient"},  ": A map from the ambient ring to ", TT {"tensorRing"}},
+	    {BOLD {"substitution"}, ": A map from ", TT {"tensorRing"}, " to ", TT {"tensorRing"}},
 	    {BOLD {"fullSubstitution"}, ": Composition of ",TT {"Substitution"}, " and ", TT {"ProjectionBase."}},
 	    {BOLD {"syzygyIdeal"}, ": This is used in the function ", TO "sagbi", " to calculate toric syzygies."},
 	    {BOLD {"liftedPres"}, ": This is used in normal form calculations."}
@@ -767,7 +767,7 @@ doc ///
      monoCoef
  --    (monoCoef, RingElement, RingElement)
    Headline
-     For polynomial @TT "p"@ and monomial @TT "m"@, extract the (possibly non-constant) "coefficient" of @TT "m"@ in @TT "p"@.
+     For polynomial $p$ and monomial $m$, extract the (possibly non-constant) "coefficient" of $m$ in $p$.
    Inputs
      m:RingElement
        A monomial. 
@@ -795,7 +795,7 @@ doc ///
    Key
      toMonomial
    Headline
-     Converts an exponent vector @TT "L"@ to a monomial in @TT "vars R"@.
+     Converts an exponent vector $L$ to a monomial in the variables of the polynomial ring $R$.
    Inputs
      R:PolynomialRing
        A polynomial ring.
@@ -811,8 +811,6 @@ doc ///
        gndR = QQ[x,y,z];
        toMonomial(gndR, {5,2,1})
 ///
-
-
 
 doc ///
    Key
