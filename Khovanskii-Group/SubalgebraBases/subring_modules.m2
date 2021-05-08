@@ -1,5 +1,5 @@
 Subring ^ ZZ := Subring => (subR, n) -> (
-    tense := subR#"PresRing"#"TensorRing";
+    tense := subR#"presentation"#"tensorRing";
     amb := ambient subR;
     if n <= 0_ZZ then (
 	error "Module rank must be positive.";

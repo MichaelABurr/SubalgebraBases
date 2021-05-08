@@ -281,7 +281,7 @@ doc ///
 	      -- Sort the rows of the matrix for more predictable behavior.
 	      final = matrix transpose {sort first entries transpose final};
 	      final = extractEntries(final, gVars);
-    	      subR#"PresRing"#"FullSub"(sub(final,subR#"presentation"#"tensorRing"))
+    	      subR#"presentation"#"fullSubstitution"(sub(final,subR#"presentation"#"tensorRing"))
 	      );
 	Text
 	   The function @TT "mingensSubring"@ works by converting the given matrix (which should be thought of as a module) to an 
@@ -466,7 +466,7 @@ doc ///
 	    {BOLD {"projectionAmbient"},  ": A map from ", TT {"tensorRing"}, " to the ambient ring."},
 	    {BOLD {"inclusionAmbient"},  ": A map from the ambient ring to ", TT {"tensorRing"}},
 	    {BOLD {"substitution"}, ": A map from ", TT {"tensorRing"}, " to ", TT {"tensorRing"}},
-	    {BOLD {"fullSubstitution"}, ": Composition of ",TT {"Substitution"}, " and ", TT {"ProjectionBase."}},
+	    {BOLD {"fullSubstitution"}, ": Composition of ",TT {"substitution"}, " and ", TT {"projectionAmbient."}},
 	    {BOLD {"syzygyIdeal"}, ": This is used in the function ", TO "sagbi", " to calculate toric syzygies."},
 	    {BOLD {"liftedPres"}, ": This is used in normal form calculations."}
 	   }@
@@ -478,28 +478,28 @@ doc ///
        i2 : subR = subring {y, y*x-x^2, y*x^2};
 
        i3 : debugPrintAllMaps subR
-       - ProjectionInclusion:
+       - sagbiInclusion:
        maps p_0 to 0
        maps p_1 to 0
        maps p_2 to p_2
        maps p_3 to p_3
        maps p_4 to p_4
-       - ProjectionBase:
+       - projectionAmbient:
        maps p_0 to x
        maps p_1 to y
        maps p_2 to 0
        maps p_3 to 0
        maps p_4 to 0
-       - InclusionBase:
+       - inclusionAmbient:
        maps x to p_0
        maps y to p_1
-       - Substitution:
+       - substitution:
        maps p_0 to p_0
        maps p_1 to p_1
        maps p_2 to p_1
        maps p_3 to -p_0^2+p_0*p_1
        maps p_4 to p_0^2*p_1
-       - FullSub:
+       - fullSubstitution:
        maps p_0 to x
        maps p_1 to y
        maps p_2 to y
