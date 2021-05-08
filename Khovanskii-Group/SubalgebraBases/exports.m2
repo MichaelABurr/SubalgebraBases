@@ -26,7 +26,6 @@ export {
     "StrWidth",
     "mingensSubring",
     "moduleToSubringIdeal",
-    "monoCoef",
     "intrinsicReduce",
     "toricSyz",
     "subalgEquals",
@@ -34,8 +33,12 @@ export {
     "isSubalg",
     "autoreduce",
     "autosubduce",
-    "toMonomial",
     "extractEntries",
     "extrinsicBuchberger",
+    -*
+    -- utility functions:
+    "monoCoef",
+    "toMonomial",
     "leadCoef"
+    *-
     }
