@@ -40,8 +40,8 @@ doc ///
       Series 8, Amer Math Soc, Providence, 1996"
       }@
    SeeAlso
-     "SAGBI bases of subrings of quotient rings"
-     "Experimental implementation of modules over subrings"
+        "Experimental feature: SAGBI bases of subrings of quotient rings"
+        "Experimental feature: modules over subrings"
 ///
 
 doc ///
@@ -137,7 +137,7 @@ doc ///
 
 doc /// 
     Key
-        "SAGBI bases of subrings of quotient rings"
+        "Experimental feature: SAGBI bases of subrings of quotient rings"
     Description
         Text
           The SAGBI algorithm implementation used in this package was originally written by Mike Stillman in approximately 1999
@@ -192,7 +192,7 @@ doc ///
 ///
 doc /// 
     Key
-        "Experimental implementation of modules over subrings"
+        "Experimental feature: modules over subrings"
     Description
         Text
 	  
@@ -705,7 +705,7 @@ doc ///
      Text 
        This function is highly experimental.
    SeeAlso
-     "Experimental implementation of modules over subrings"
+     "Experimental feature: modules over subrings"
 ///
 
 doc ///
@@ -841,7 +841,7 @@ doc ///
    Usage 
      result = toricSyz(subR, M)
    Description
-     Text      
+     Text
        This is an experimental implementation of algorithm 11.18 in Sturmfels' "Gröbner bases and Convex Polytopes."
      Example 
        R = QQ[t_1,t_2];
@@ -849,7 +849,7 @@ doc ///
        M = matrix{{t_1^2, t_1*t_2}};
        toricSyz(A, M)
      Text
-       See @TO "Experimental implementation of modules over subrings"@ for another example.
+       See @TO "Experimental feature: modules over subrings"@ for another example.
 ///
 
 doc ///
@@ -934,7 +934,7 @@ doc ///
        for handling modules. 
        
    SeeAlso
-     "Experimental implementation of modules over subrings"
+    "Experimental feature: modules over subrings"
 ///
 
 
