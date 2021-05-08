@@ -51,12 +51,10 @@ doc ///
      (subalgebraBasis, Matrix)
      (subalgebraBasis, List)
    Headline
-     Does the same thing as the function "sagbi," except returns a matrix. 
+     subalgebra basis (sagbi basis) generators
    Description
      Text
-       The command @TT "subalgebraBasis A"@ is equivalent to the command @TT "gens sagbi A"@.       
-       
-       This function is redundant given that the function @TO "sagbi"@ exists. However, it is required for legacy purposes. 
+       The command @TT "subalgebraBasis A"@ is equivalent to the command @TT "gens sagbi A"@.
    SeeAlso
      sagbi
 ///
@@ -100,7 +98,7 @@ doc ///
        whose entries form a partial subalgebra basis
    Description
     Text
-        The output of this function is generally a partial subalgebra basis. This is unavoidable, since a subalgebra of a polynomial ring, endowed with some polynomial order, need not have a finite subalgebra basis. 
+        The output of this function is a partial subalgebra basis. This is unavoidable, since a subalgebra of a polynomial ring, endowed with some polynomial order, need not have a finite subalgebra basis.
 	
 	Here is a quintessential example of this phenomenon:
     Example
@@ -128,6 +126,7 @@ doc ///
         The output of the last command is a finite Sagbi basis, but the computation necessary to verify this fact required setting Limit to at least 6.
    Caveat
    SeeAlso
+        subalgebraBasis
 ///
 
 
@@ -140,8 +139,7 @@ doc ///
           The SAGBI algorithm implementation used in this package was originally written by Mike Stillman in approximately 1999
 	  for the purpose of implementing concepts from the paper "Using SAGBI bases to compute invariants" by Stillman and Tsai.
 	  Namely, the purpose was to be capable of calculating Sagbi bases of subrings contained in quotient rings. 
-	  
-	  Although this purpose was not understood by later programmers, the code still retains this capability. However, there are
+	  The code still retains this capability, but there are
 	  some pecularities. Consider the following example: 
 	  
 	Example
@@ -483,7 +481,7 @@ doc ///
 doc ///
    Key
      autoreduce
-  --   (autoreduce, Subring, Matrix)
+     (autoreduce, Subring, Matrix)
    Headline
      Perform autoreduction of the generators of an ideal of a subring.
    Inputs
@@ -551,7 +549,7 @@ doc ///
 doc ///
    Key
      autosubduce
-   --  (autosubduce, Matrix)
+     (autosubduce, Matrix)
    Headline
      Performs autosubduction on the generators of a subring.
    Usage
@@ -574,7 +572,7 @@ doc ///
 doc ///
    Key
      isSubalg
---     (isSubalg, Subring, Subring)
+     (isSubalg, Subring, Subring)
    Headline
      Calculates whether a given subring is contained in another subring.
    Usage
@@ -598,7 +596,7 @@ doc ///
 doc ///
    Key
      leadCoef
-  --   (leadCoef, RingElement)
+     (leadCoef, RingElement)
    Headline
      Returns the coefficient of the lead monomial of f.
    Usage
@@ -652,7 +650,7 @@ doc ///
 doc ///
    Key
      mingensSubring
-  --   (mingensSubring, Subring, Matrix)
+     (mingensSubring, Subring, Matrix)
    Headline
      Given a matrix that is considered as a module over a subring, this performs autoreduction on its generators.
    Usage
@@ -672,7 +670,7 @@ doc ///
 doc ///
    Key
      moduleToSubringIdeal
-    -- (moduleToSubringIdeal, Subring, Matrix)
+     (moduleToSubringIdeal, Subring, Matrix)
    Headline
      Convert a module stored as a matrix to a subring ideal.
    Usage
@@ -699,8 +697,8 @@ doc ///
 doc ///
    Key
      subalgEquals
-  --   (symbol ==, Subring, Subring)
-  --   (subalgEquals, Subring, Subring)
+     (symbol ==, Subring, Subring)
+     (subalgEquals, Subring, Subring)
    Headline
      Check if two subring instances are mathematically equal.
    Usage
@@ -765,7 +763,7 @@ doc ///
 doc ///
    Key
      monoCoef
- --    (monoCoef, RingElement, RingElement)
+     (monoCoef, RingElement, RingElement)
    Headline
      For polynomial $p$ and monomial $m$, extract the (possibly non-constant) "coefficient" of $m$ in $p$.
    Inputs
@@ -815,7 +813,7 @@ doc ///
 doc ///
    Key
      toricSyz
-  --   (toricSyz, Subring, Matrix)
+     (toricSyz, Subring, Matrix)
    Headline
      Calculate toric (monomial) syzygies of a set of monomials in the initial algebra.
    Inputs
@@ -838,9 +836,8 @@ doc ///
 doc ///
    Key
      intrinsicReduce
-  --   (intrinsicReduce, Subring, Matrix, RingElement)
-  --   (intrinsicReduce, Subring, Matrix, Matrix)
-
+     (intrinsicReduce, Subring, Matrix, RingElement)
+     (intrinsicReduce, Subring, Matrix, Matrix)
    Headline
      Compute normal forms relative to an ideal within a subring that has a known Sagbi basis.
    Inputs
@@ -1186,7 +1183,6 @@ doc ///
      Subring
 ///
 
--- FIX ME
 doc ///
    Key
      (symbol //, RingElement, Subring)
@@ -1208,7 +1204,7 @@ doc ///
        because this Groebner basis is stored in the cache of @TT "subR"@ after it is found. Another implication of this is that
        it may take a very long time to compute for difficult subrings.   
        
-       Doubts have been expressed about the theoretical basis of this function. Use as directed and wear protective goggles. 
+       Doubts have been expressed about the theoretical basis of this function.
      Example
        gndR = QQ[x];
        A = subring sagbi subring {x^4+x^3, x^2+x}
@@ -1216,4 +1212,21 @@ doc ///
        f = x^3 + x^2
        g = f//A
        (A#"presentation"#"fullSubstitution")(g) == f
+///
+
+doc ///
+   Key
+     isSagbi
+     (isSagbi,Subring)
+   Headline
+     test if the generators form sagbi basis
+   Usage
+     result = isSagbi(subR)
+   Inputs
+     subR:Subring
+   Outputs
+     result:Boolean
+   Description
+     Text
+      Returns true if the subring was generated from a finite sagbi basis using the command @TO "(subring,SAGBIBasis)"@.  Note that this function does not perform a sagbi computation, so it does not confirm that a generating set is a sagbi basis.
 ///
