@@ -16,6 +16,7 @@
 -- 15) invariants of A^1, with a nilpotent action of A^4
 -- 16) elimination order on ambient ring
 -- 17) 'symmetric' quadratic artin ideal in 2x3 variables
+-- 18) toricSyz, Sturmfels example 11.19
 
 
 -- 0) Subring tests
@@ -25,9 +26,7 @@ S = QQ[e1, e2, e3, y];
 f = map(R, S, {x1 + x2 + x3, x1*x2 + x1*x3 + x2*x3, x1*x2*x3,
 (x1 - x2)*(x1 - x3)*(x2 - x3)});
 A = subring matrix f;
--- "presentationRing" and "presentation" removed 
--- pR = presentationRing A;
--- assert (presentation A == matrix {{pR_0^2*pR_1^2-4*pR_0^3*pR_2-4*pR_1^3+18*pR_0*pR_1*pR_2-27*pR_2^2-pR_3^2}})
+assert(not isSagbi A)
 ///
 ---------------------
 
@@ -430,6 +429,14 @@ assert(
 ///
 ----------------------------------------------------
 
+-- 18) toricSyz, Sturmfels example 11.19
+TEST ///
+R = QQ[t_1,t_2];
+A = subring sagbi{t_1^2,t_1*t_2,t_2^2};
+M = matrix{{t_1^2, t_1*t_2}};
+assert(toricSyz(A, M)==matrix {{-t_2^2, t_1*t_2}, {-t_1*t_2, t_1^2}});
+///
+----------------------------------------------------
 
 end
 
