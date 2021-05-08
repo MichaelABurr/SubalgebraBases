@@ -66,7 +66,6 @@ internalSubduction(PresRing, Matrix) := (pres, M) -> (
 subalgebraBasis = method(
     TypicalValue => Matrix, 
     Options => {
-	Strategy => null,
 	Autosubduce => true,
     	Limit => 100,
     	PrintLevel => 0
@@ -87,8 +86,7 @@ subalgebraBasis(Subring) := o -> subR -> (
 sagbi = method(
     TypicalValue => Subring, 
     Options => {
-    	Strategy => null,
-	    Autosubduce => true,
+	Autosubduce => true,
     	Limit => 100,
     	PrintLevel => 0,
         storePending => true
@@ -107,8 +105,6 @@ sagbi(Subring) := o -> S -> (
     sagbi(o, sagbiBasis S)
     );
 
-
--- sagbi(Subring) := o -> S -> sagbi(o,sagbiBasis S);
 
 -- PrintLevel > 0: Print some information each loop, but don't print any polynomials.
 -- PrintLevel > 1: Print new Sagbi gens.
