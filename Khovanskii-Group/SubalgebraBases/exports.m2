@@ -34,7 +34,7 @@ export {
     "autoreduce",
     "autosubduce",
     "extractEntries",
-    "extrinsicBuchberger",
+    "extrinsicBuchberger"
     -*
     -- utility functions:
     "monoCoef",
