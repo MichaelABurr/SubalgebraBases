@@ -13,9 +13,13 @@ undocumented {
     insertPending,
     VarBaseName,
     storePending,
+    -- the next three are utility functions (refactor later)
     toMonomial,
     monoCoef,
-    leadCoef
+    leadCoef,
+    genVars,
+    internalSubduction,
+    sagbiDone
     }
 
 doc ///
@@ -1224,17 +1228,41 @@ doc ///
    Key
      isSagbi
      (isSagbi,Subring)
+     (isSagbi,Subring)
+     (isSagbi,Subring)
    Headline
      test if the generators form sagbi basis
    Usage
-     result = isSagbi(subR)
+     result = isSagbi subR
    Inputs
      subR:Subring
    Outputs
      result:Boolean
+       true or false, depending on whether or not the generators are a SAGBI basis with respect to the term order.
    Description
-     Text
-      Returns true if the subring was generated from a finite sagbi basis using the command @TO "subring"@.  Note that this function does not perform a sagbi computation, so it does not confirm that a generating set is a sagbi basis.
+     Example
+       R = QQ[x,y,z];
+       L = {y*(x-1), y*x^2, y*(x^3+x^2+x+1), y^2};
+       isSagbi L
+       M = {x+y+z,x*y+x*z+y*z, x*y*z, (x-y)*(x-z)*(y-z)};
+       isSagbi M;
+       N = {x+y+z,x*y+x*z+y*z, x*y*z}
+       isSagbi N
+///
+      
+isSagbi List := L -> isSagbi subring L
+isSagbi Matrix := M -> isSagbi subring M
+end--
+restart
+needs "isSagbi.m2"
+R = QQ[x,y,z]
+L = {y*(x-1), y*x^2, y*(x^3+x^2+x+1), y^2} 
+isSagbi L
+isSagbi matrix{L}
+M = {x+y+z,x*y+x*z+y*z, x*y*z, (x-y)*(x-z)*(y-z)}
+isSagbi M
+N = {x+y+z,x*y+x*z+y*z, x*y*z}
+isSagbi N
 ///
 
 doc ///

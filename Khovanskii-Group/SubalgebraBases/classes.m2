@@ -26,9 +26,6 @@ gens Subring := o -> A -> A#"generators"
 numgens Subring := A -> (numcols gens A)
 net Subring := A -> "subring of " | toString(ambient A)
 
-isSagbi = method()
-isSagbi Subring := A -> A#"isSAGBI"
-
 -- SAGBIBasis data type
 -- This is a computation object which can hold the intermediate
 -- results of a sagbi basis computation.
