@@ -1165,6 +1165,7 @@ doc ///
      subring
      (subring, List)
      (subring, Matrix)
+     (subring, SAGBIBasis)
      VarBaseName
      [subring, VarBaseName]
      [makePresRing, VarBaseName]
@@ -1172,11 +1173,14 @@ doc ///
      Constructs a subring of a polynomial ring.
    Usage
      A = subring M
+     A = subring L
+     A = subring S
    Inputs
      M:Matrix
        A one-row matrix whose entries are the generators of the resulting subring.
      L:List 
        A list whose entries are the generators of the resulting subring.
+     S:SAGBIBasis
      VarBaseName=>String
        Determines the symbol used for the variables of the @TT "tensorRing"@ of the resulting @TO "Subring"@ instance.
    Outputs
@@ -1271,7 +1275,7 @@ doc ///
      result:Boolean
    Description
      Text
-      Returns true if the subring was generated from a finite sagbi basis using the command @TO "(subring,SAGBIBasis)"@.  Note that this function does not perform a sagbi computation, so it does not confirm that a generating set is a sagbi basis.
+      Returns true if the subring was generated from a finite sagbi basis using the command @TO "subring"@.  Note that this function does not perform a sagbi computation, so it does not confirm that a generating set is a sagbi basis.
 ///
 
 doc ///
@@ -1291,3 +1295,45 @@ doc ///
         Returns the variables corresponding to the subalgebra generators in the tensor ring of a subring.
 ///
 
+doc ///
+   Key
+     internalSubduction
+     (internalSubduction,PresRing,Matrix)
+     (internalSubduction,PresRing,RingElement)
+   Headline
+     performs subduction from a presentation ring
+   Usage
+     result = internalSubduction(presR,relem)
+     result = internalSubduction(presR,M)
+   Inputs
+     presR:PresRing
+     relem:RingElement
+     M:Matrix
+        A matrix of ring elements to be subducted
+   Outputs
+     result:Matrix
+   Description
+     Text
+        Performs subduction of the @TO "RingElement"@ or the entries of the @TO "Matrix"@ against the content of the @TO "PresRing"@.  This is typically an internal call and @TO "subduction"@, @TO "autosubduce"@, @TO "autoreduce"@ should be used instead.
+   SeeAlso
+     subduction
+     autosubduce
+     autoreduce
+///
+
+doc ///
+   Key
+     sagbiDone
+     (sagbiDone,SAGBIBasis)
+   Headline
+     Test if sagbi basis computation is complete
+   Usage
+     result = sagbiDone(S)
+   Inputs
+     S:SAGBIBasis
+   Outputs
+     result:Matrix
+   Description
+     Text
+        Returns true if the sagbi basis computation has been completed.
+///
