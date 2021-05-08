@@ -25,7 +25,7 @@ moduleToSubringIdeal(Subring, Matrix) := (subR, M) -> (
     -- assumptions about the properties of the resulting subring. 
     -- TODO: consider the implications of removing these checks so that this function
     -- can work when subR isn't a Sagbi basis.
-    if not subR#"isSagbi" then(
+    if not subR#"isSAGBI" then(
 	error "Only modules over Subring instances that are a sagbi basis are currently supported.";
 	);
     
@@ -35,22 +35,22 @@ moduleToSubringIdeal(Subring, Matrix) := (subR, M) -> (
     
     -- The value of these generators doesn't matter, but they should be increasing under
     -- the monomial order.
-    tense := subR#"PresRing"#"TensorRing";
+    tense := subR#"presentation"#"tensorRing";
     dummy := for i from 1 to numcols M list( ((vars tense)_(0,0))^i );
     dummy = matrix({dummy});
     monoRing := subring(dummy);
     gVars := genVars(monoRing);
     
-    M1 := subR#"PresRing"#"InclusionBase";
-    M2 := monoRing#"PresRing"#"InclusionBase";
+    M1 := subR#"presentation"#"inclusionAmbient";
+    M2 := monoRing#"presentation"#"inclusionAmbient";
     
     result2 := ((M2 M1 M)*(transpose gVars));
         
     -- This call to sagbi *should* terminate quickly if subR is a Sagbi basis.    
-    coolRing := sagbi subring ((M2 M1 gens subR)|gVars);    
+    coolRing := subring sagbi subring ((M2 M1 gens subR)|gVars);    
     
     -- If either of these checks fail, it could mean that the monomial order on coolRing isn't behaving.
-    if not coolRing#"isSagbi" then(
+    if not coolRing#"isSAGBI" then(
 	error "Could not construct a sagbi basis of module's ring. ";
 	);
     assert(result2%coolRing == 0);
@@ -79,7 +79,7 @@ mingensSubring(Subring, Matrix) := (subR, M) -> (
     -- Sort the rows of the matrix for more predictable behavior.
     final = matrix transpose {sort first entries transpose final};
     final = extractEntries(final, gVars);
-    subR#"PresRing"#"FullSub"(sub(final,subR#"PresRing"#"TensorRing"))
+    subR#"presentation"#"fullSubstitution"(sub(final,subR#"presentation"#"tensorRing"))
     );
 
 -- For polynomial p monomial m, extract the coefficient of m in p. For example:

@@ -21,16 +21,16 @@ debugPrintAllMaps(Subring) := subR -> (
     print("--------------------------------");
     print("-- PresRing map info dump:");
     print("--------------------------------");
-    print("-- ProjectionInclusion:");
-    debugPrintMap (pres#"ProjectionInclusion");
-    print("-- ProjectionBase:");
-    debugPrintMap (pres#"ProjectionBase");
-    print("-- InclusionBase:");
-    debugPrintMap (pres#"InclusionBase");
-    print("-- Substitution:");
-    debugPrintMap (pres#"Substitution");
-    print("-- FullSub:");
-    debugPrintMap (pres#"FullSub");
+    print("-- sagbiInclusion:");
+    debugPrintMap (pres#"sagbiInclusion");
+    print("-- projectionAmbient:");
+    debugPrintMap (pres#"projectionAmbient");
+    print("-- inclusionAmbient:");
+    debugPrintMap (pres#"inclusionAmbient");
+    print("-- substitution:");
+    debugPrintMap (pres#"substitution");
+    print("-- fullSubstitution:");
+    debugPrintMap (pres#"fullSubstitution");
     print("--------------------------------");
     print("-- End PresRing map info dump.");
     print("--------------------------------");
@@ -70,7 +70,7 @@ debugPrintGens(Subring) := o -> subR -> (
     G := genVars subR;
     for i from 0 to (numcols G)-1 do(
 	var := G_(0,i);
-	p := (subR#"PresRing"#"FullSub")(var);
+	p := (subR#"presentation"#"fullSubstitution")(var);
 	pnet := ({" "}|(unstack net var));
 	fmt := ((stack pnet)|colon);
 	final := fmt|(shortenNet(p, o.StrWidth)); 

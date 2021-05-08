@@ -59,7 +59,7 @@ SAGBIBasis = new Type of HashTable
 
 net SAGBIBasis := S -> (
     numGens := numcols S#"sagbiGenerators";
-    sagbiLimit = S#"stoppingData"#"limit";
+    sagbiLimit := S#"stoppingData"#"limit";
     intro := null;
     if S#"sagbiDone" then (
     	intro = "SAGBIBasis Computation Object with ";
@@ -109,16 +109,19 @@ gens SAGBIBasis := o -> S -> (
     )
 )
 
-subring SAGBIBasis := {} >> opts -> S -> (
+subring SAGBIBasis := opts -> S -> (
     G := gens S;
-    if S#"sagbiDone" then new Subring from{
-        "ambientRing" => ring S#"sagbiGenerators",
-        "generators" => G,
-        "presentation" => makePresRing(opts, ring S#"sagbiGenerators", S#"sagbiGenerators"),
-        "isSAGBI" => true,
-        cache => new CacheTable from {}}
-    else subring G
-)
+    if S#"sagbiDone" then ( 
+    	new Subring from{
+            "ambientRing" => ring S#"sagbiGenerators",
+            "generators" => G,
+            "presentation" => makePresRing(opts, ring S#"sagbiGenerators", S#"sagbiGenerators"),
+            "isSAGBI" => true,
+            cache => new CacheTable from {}}
+    	)else (
+    	subring(opts, G)
+    	)
+    )
 
 sagbiDone = method(Options => {})
 sagbiDone SAGBIBasis := opts -> S -> S#"sagbiDone"
