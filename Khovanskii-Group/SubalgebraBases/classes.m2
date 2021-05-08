@@ -48,9 +48,9 @@ net SAGBIBasis := S -> (
     intro | toString(numGens) | " generators, Limit = " | toString(sagbiLimit) | "."
 )
 
-sagbiBasis = method(Options => true)
-sagbiBasis Subring := {limit => -1} >> opts -> S -> (
-    stopping := new HashTable from {"limit" => opts.limit, "degree" => -1};
+sagbiBasis = method(Options => {storePending => true, VarBaseName => "p"})
+sagbiBasis Subring := opts -> S -> (
+    stopping := new HashTable from {"limit" => -1, "degree" => -1};
     pending := new HashTable;
     new SAGBIBasis from {
         "ambientRing" => ambient S,
@@ -64,7 +64,7 @@ sagbiBasis Subring := {limit => -1} >> opts -> S -> (
     }
 )
 
-sagbiBasis MutableHashTable := {storePending => true, VarBaseName => "p"} >> opts -> H -> (
+sagbiBasis MutableHashTable :=  opts -> H -> (
     stopping := new HashTable from {"limit" => H#"stoppingData"#"limit", "degree" => H#"stoppingData"#"degree"};
     pending := if opts.storePending then new HashTable from H#"pending" else new HashTable;
     new SAGBIBasis from {

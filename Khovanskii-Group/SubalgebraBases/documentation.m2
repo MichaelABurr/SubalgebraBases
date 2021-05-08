@@ -65,6 +65,7 @@ doc ///
      (sagbi,Subring)
      (sagbi, Matrix)
      (sagbi, List)
+     (sagbi,SAGBIBasis)
      [sagbi,Limit]
      [sagbi,PrintLevel]
      [sagbi,Strategy]
@@ -79,12 +80,15 @@ doc ///
      N = sagbi M
      N = sagbi A
      N = sagbi L
+     N = sagbi B
    Inputs
      A:Subring
      M:Matrix
        of generators for a subring of @ ofClass{PolynomialRing} @
      L:List
        containing generators for a subring of @ ofClass{PolynomialRing} @
+     B:SAGBIBasis
+        containing a partial computation of a sagbi basis
      Limit=>ZZ
        a degree limit for the binomial S-pairs that are computed internally.
      PrintLevel=>ZZ
@@ -408,6 +412,16 @@ doc ///
        sagbi
 ///
 
+doc ///
+   Key
+     SAGBIBasis
+   Headline
+     The type of all sagbi bases
+   Description
+     Text
+        This is a computation object for sagbi bases.  It stores a partial sagbi computation for picking up a computation where it left off.
+   SeeAlso
+///
 
 doc ///
    Key
@@ -1145,6 +1159,7 @@ doc ///
    SeeAlso
      (moduleToSubringIdeal, Subring, Matrix)
 ///
+
 doc ///
    Key
      subring
@@ -1181,6 +1196,34 @@ doc ///
 
    SeeAlso
      Subring
+///
+
+doc ///
+   Key
+     sagbiBasis
+     (sagbiBasis,Subring)
+     (sagbiBasis,MutableHashTable)
+     [sagbiBasis,storePending]
+     [sagbiBasis,VarBaseName]
+   Headline
+     Constructs a computation object from a subring.
+   Usage
+     B = sagbiBasis S
+     B = sagbiBasis(S,storePending=>b)
+     B = sagbiBasis(S,VarBaseName=>v)
+   Inputs
+     S:Subring
+     b:Boolean
+        determines if the pending list (which may be large) is stored internally at the end of a computation.
+     v:String
+        name to be used internally for variables in the tensor ring.
+   Outputs
+     B:SAGBIBasis
+   Description
+     Text
+       This function serves as the canonical constructor --for the @TO "SAGBIBasis"@ type.  It is also the output of the @TO "sagbi"@ function.
+   SeeAlso
+     SAGBIBasis
 ///
 
 doc ///
@@ -1230,3 +1273,21 @@ doc ///
      Text
       Returns true if the subring was generated from a finite sagbi basis using the command @TO "(subring,SAGBIBasis)"@.  Note that this function does not perform a sagbi computation, so it does not confirm that a generating set is a sagbi basis.
 ///
+
+doc ///
+   Key
+     genVars
+     (genVars,Subring)
+   Headline
+     tensor ring generators
+   Usage
+     result = genVars(subR)
+   Inputs
+     subR:Subring
+   Outputs
+     result:Matrix
+   Description
+     Text
+        Returns the variables corresponding to the subalgebra generators in the tensor ring of a subring.
+///
+
