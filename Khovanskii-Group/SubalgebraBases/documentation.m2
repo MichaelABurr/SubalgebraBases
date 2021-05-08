@@ -1219,8 +1219,8 @@ doc ///
    Key
      isSagbi
      (isSagbi,Subring)
-     (isSagbi,Subring)
-     (isSagbi,Subring)
+     (isSagbi,Matrix)
+     (isSagbi,List)
    Headline
      test if the generators form sagbi basis
    Usage
