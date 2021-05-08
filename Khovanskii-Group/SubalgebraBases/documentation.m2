@@ -40,8 +40,8 @@ doc ///
       Series 8, Amer Math Soc, Providence, 1996"
       }@
    SeeAlso
-     "SAGBI bases of subrings of quotient rings"
-     "Experimental implementation of modules over subrings"
+        "Experimental feature: SAGBI bases of subrings of quotient rings"
+        "Experimental feature: modules over subrings"
 ///
 
 doc ///
@@ -137,7 +137,7 @@ doc ///
 
 doc /// 
     Key
-        "SAGBI bases of subrings of quotient rings"
+        "Experimental feature: SAGBI bases of subrings of quotient rings"
     Description
         Text
           The SAGBI algorithm implementation used in this package was originally written by Mike Stillman in approximately 1999
@@ -192,7 +192,7 @@ doc ///
 ///
 doc /// 
     Key
-        "Experimental implementation of modules over subrings"
+        "Experimental feature: modules over subrings"
     Description
         Text
 	  In order to explain how modules over subrings are implemented in this package, it will be helpful to look at an example. 
@@ -705,7 +705,7 @@ doc ///
      Text 
        This function is highly experimental.
    SeeAlso
-     "Experimental implementation of modules over subrings"
+     "Experimental feature: modules over subrings"
 ///
 
 doc ///
@@ -844,7 +844,7 @@ doc ///
        
        B. Sturmfels, Groebner bases and Convex Polytopes, Univ. Lecture Series 8, Amer Math Soc, Providence, 1996
       
-       See @TO "Experimental implementation of modules over subrings"@ for an example application of this function.
+       See @TO "Experimental feature: modules over subrings"@ for an example application of this function.
 ///
 
 doc ///
@@ -929,7 +929,7 @@ doc ///
        for handling modules. 
        
    SeeAlso
-     "Experimental implementation of modules over subrings"
+    "Experimental feature: modules over subrings"
 ///
 
 
