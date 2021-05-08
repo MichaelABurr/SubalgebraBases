@@ -255,7 +255,7 @@ Matrix // Subring := (M, A) -> (
 
 -- Returns the tensor ring because the function ambient returns the ambient ring.
 ring Subring := A -> (
-A#"presentation"#"tensorRing"
+    A#"presentation"#"tensorRing"
 );
 
 end-- 
