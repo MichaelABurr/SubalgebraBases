@@ -16,10 +16,7 @@ undocumented {
     -- the next three are utility functions (refactor later)
     toMonomial,
     monoCoef,
-    leadCoef,
-    genVars,
-    internalSubduction,
-    sagbiDone
+    leadCoef
     }
 
 doc ///
@@ -35,7 +32,7 @@ doc ///
       $in(f_1), \ldots , in(f_k).$ 
       The main functions provided by this package are for computing these subalgebra bases: @TO sagbi @, @TO subalgebraBasis@, and @TO subduction @.
       Some useful functions for internal use and experimental features are also provided.
-    Text
+      Text
        {\bf Some references for Subalgebra bases (aka canonical subalgebra bases, SAGBI bases)}
 
       @UL {
@@ -1244,21 +1241,6 @@ doc ///
        isSagbi N
 ///
       
-isSagbi List := L -> isSagbi subring L
-isSagbi Matrix := M -> isSagbi subring M
-end--
-restart
-needs "isSagbi.m2"
-R = QQ[x,y,z]
-L = {y*(x-1), y*x^2, y*(x^3+x^2+x+1), y^2} 
-isSagbi L
-isSagbi matrix{L}
-M = {x+y+z,x*y+x*z+y*z, x*y*z, (x-y)*(x-z)*(y-z)}
-isSagbi M
-N = {x+y+z,x*y+x*z+y*z, x*y*z}
-isSagbi N
-///
-
 doc ///
    Key
      genVars
