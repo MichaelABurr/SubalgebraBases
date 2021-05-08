@@ -195,6 +195,7 @@ doc ///
         "Experimental implementation of modules over subrings"
     Description
         Text
+	  
 	  In order to explain how modules over subrings are implemented in this package, it will be helpful to look at an example. 
 	  The following is an implementation of Example 11.19 from "Groebner bases and Convex Polytopes" by Bernd Sturmfels:
         CannedExample
@@ -207,12 +208,11 @@ doc ///
 		t_1*t_3^2,
 		t_2^2*t_3,
 		t_2*t_3^2};
-	  G := matrix {{t_1^(2*i)*t_2^(2*i)*t_3^(2*i), t_1^((3*i)+2)*t_2*t_3^(3*i)}}
+	  G := matrix {{t_1^4*t_2^4*t_3^4, t_1^8*t_2*t_3^6}}
 	  subR = subring sagbi subring A;
 	  assert((set first entries gens subR) === (set A)); 
 	  tsyz := toricSyz(subR, G);
 	  assert(tsyz * (transpose G) == 0);
-
 	  ans1 = mingensSubring(subR, tsyz);  
 	Text
 	  The resulting value of ans1 and its normal form are:
@@ -832,19 +832,24 @@ doc ///
      Calculate toric (monomial) syzygies of a set of monomials in the initial algebra.
    Inputs
      subR:Subring
+         Generators are assumed to be a (complete) SAGBI basis.
      M:Matrix
-     	 A one-row matrix of monomials elements in the initial algebra of subR.
+     	 A 1 x r matrix of monomials in the initial algebra of subR.
    Outputs
      result:Matrix
+         The syzygies of M in the rank-r free module over the initial algebra.
    Usage 
      result = toricSyz(subR, M)
    Description
      Text      
-       This is an implementation of algorithm 11.18 of the following text:
-       
-       B. Sturmfels, Groebner bases and Convex Polytopes, Univ. Lecture Series 8, Amer Math Soc, Providence, 1996
-      
-       See @TO "Experimental implementation of modules over subrings"@ for an example application of this function.
+       This is an experimental implementation of algorithm 11.18 in Sturmfels' "Gröbner bases and Convex Polytopes."
+     Example 
+       R = QQ[t_1,t_2];
+       A = subring sagbi{t_1^2,t_1*t_2,t_2^2};
+       M = matrix{{t_1^2, t_1*t_2}};
+       toricSyz(A, M)
+     Text
+       See @TO "Experimental implementation of modules over subrings"@ for another example.
 ///
 
 doc ///
