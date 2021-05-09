@@ -216,9 +216,8 @@ doc ///
         "Experimental feature: modules over subrings"
     Description
         Text
-	  
-	  In order to explain how modules over subrings are implemented in this package, it will be helpful to look at an example. 
-	  The following is an implementation of Example 11.19 from "Groebner bases and Convex Polytopes" by Bernd Sturmfels:
+            We illustrate modules over subrings are implemented through an example.
+	        The following is Example 11.19 from "Groebner bases and Convex Polytopes" by Bernd Sturmfels:
         CannedExample
 	  i = 2;
 	  gndR = QQ[t_1, t_2, t_3];
@@ -236,7 +235,7 @@ doc ///
 	  assert(tsyz * (transpose G) == 0);
 	  ans1 = mingensSubring(subR, tsyz);  
 	Text
-	  The resulting value of ans1 and its normal form are:
+	  The resulting value of @TT "ans1"@ and its normal form are:
 	CannedExample
 	  i13 : ans1
 
@@ -265,12 +264,12 @@ doc ///
 	  o14 : Matrix (QQ[p ..p ])  <--- (QQ[p ..p ])
 			   0   9              0   9
     	Text
-	  This appears to agree with Sturmfels's prediction, although it is not possible to be entirely certain that this computation
-	  is correct without knowing more than the information contained in the Sturmfels text. This is because Sturmfels does not 
-	  fully specify what the set of minimal generators of this syzygy module are. Namely, it is only stated that it must include
-	  $2i+2=6$ syzygies of total degree $i+1 = 3$.
+	  --This appears to agree with Sturmfels's prediction, although it is not possible to be entirely certain that this computation
+	  --is correct without knowing more than the information contained in the Sturmfels text. This is because Sturmfels does not
+	  --fully specify what the set of minimal generators of this syzygy module are. Namely, it is only stated that it must include
+	  --$2i+2=6$ syzygies of total degree $i+1 = 3$.
 	
-	  The following code is the implementation of the function @TT "mingensSubring"@:
+	  The following code illustrates the function @TO "mingensSubring"@:
 	  
 	CannedExample	
 	  -- Performs autoreduction on M treated as a module over subR.
@@ -284,12 +283,10 @@ doc ///
     	      subR#"presentation"#"fullSubstitution"(sub(final,subR#"presentation"#"tensorRing"))
 	      );
 	Text
-	   The function @TT "mingensSubring"@ works by converting the given matrix (which should be thought of as a module) to an 
+	   The function @TO "mingensSubring"@ works by converting the given matrix (which should be thought of as a module) to an
 	   ideal inside of a subring, and then performing autoreduction on the generators of that ideal. It relies on the function
-	   @TT "moduleToSubringIdeal"@ to construct a suitable subring and provide the generators that define this ideal.
-	   
-	   In order to understand how the function @TT "moduleToSubringIdeal"@ works, it is neccessary to understand some properties
-	   of the @TO "Subring"@ type. Consider the output of the following command:
+	   @TO "moduleToSubringIdeal"@ to construct a suitable subring and provide the generators that define this ideal.
+	   Consider the output of the following command:
 	CannedExample
 	  i5 : debugPrintMap (subR#"presentation"#"fullSubstitution")
 	  maps p_0 to t_1
@@ -304,15 +301,11 @@ doc ///
 	  maps p_9 to t_1^2*t_2
         Text
 	  
-	  @TT "p_1"@, ..., @TT "p_9"@ are the variables of what is refered to in the code as the "tensorRing". The @TT "tensorRing"@ of @TT "subR"@ has two parts:
-	  the "lower variables," and the "upper variables."
+	        @TT "p_1"@, ..., @TT "p_9"@ are the variables of what is refered to in the code as the @TT "tensorRing"@,
+            which has two types of variables: The variables corresponding to the variables in the @TO "ambient"@ ring and the variables corresponding to the generators of the @TO "Subring"@
 	  
-	  The variables @TT "p_0"@, @TT "p_1"@ and @TT "p_2"@ are the lower variables of @TT "subR#\"presentation\""@. They correspond to the variables of the "ambient ring"
-	  of @TT "subR"@, which is @TT "gndR"@ in our original example. The upper variables of @TT "subR"@ are @TT "p_3"@, ..., @TT "p_9"@. These correspond to
-	  generators of the subring.
-	  
-	  The following command converts the toric syzygy module from our example (which is returned by @TT "toricSyz"@ in the form of a matrix) to an ideal 
-	  within a subring. This is identical to the @TT "moduleToSubring(subR, tsyz)"@ call that occurs in the first line of @TT "mingensSubring"@. 
+	        The following command converts the toric syzygy module from our example (which is returned by @TT "toricSyz"@ in the form of a matrix) to an ideal
+	        within a subring. This is identical to the @TT "moduleToSubring(subR, tsyz)"@ call that occurs in the first line of @TT "mingensSubring"@.
 	CannedExample
 	   i15 : (modRing, idealGens, gVars) = moduleToSubringIdeal(subR, tsyz)
 
@@ -642,26 +635,18 @@ doc ///
      result = makePresRing(gndR, gensList)
    Inputs
      gndR:PolynomialRing
-     	 The ambient ring. Contains the entries of gensMat (or gensList.)
+     	 The ambient ring. Contains the entries of @TT "gensMat"@ or @TT "gensList"@.
      gensList:List
-     	 A list of subring generators.
+     	 A list of elements of @TT "gndR"@.
      gensMat:Matrix
-     	 A one-row matrix of generators.
+     	 A one-row matrix of elements of @TT "gndR"@.
      VarBaseName => String
         Determines the symbol used for the variables of the @TT "tensorRing"@ of the resulting @TO "Subring"@ instance.
    Outputs
      result:PresRing
-    	An instance of PresRing
    Description
      Text 
-       There are very few situations where it is recommended to use this function directly. As a rule of thumb, do not use
-       this function if it is possible to use the function @TT "subring"@ instead.
-       
-       The reason why this is exported is for extensibility purposes. Having access to @TT "makePresRing"@ makes it easier
-       to implement functions that have complete control over the data within a @TT "Subring"@ instance. 
-       
-       For example, this function is used in the implementation of @TO "sagbi"@ because there it is neccessary to create an
-       instance of the @TO "Subring"@ type with a very specific state. 
+       There are very few situations where it is recommended to use this function directly, it is better to use the function @TT "subring"@ instead.
 ///
 
 
@@ -761,7 +746,7 @@ doc ///
      A verbose mode for the Sagbi algorithm.
    Description
      Text 
-       There are currently three different levels supported for this option:
+       There are three different levels supported for this option:
        
        @UL{
 	   "0: default, print nothing.",
@@ -842,12 +827,12 @@ doc ///
      extrinsicBuchberger
      (extrinsicBuchberger, Subring, Matrix)
    Headline
-     Computes a Gröbner basis of an ideal within a Subring.
+     Computes a Gröbner basis of an ideal within a @TO "Subring"@.
    Usage
      extrinsicBuchberger(M, gVars)
    Inputs
      M:Matrix
-    	A 1-column matrix that is probably the result of a call to moduleToSubringIdeal.
+    	A 1-column matrix that is often the result of a call to moduleToSubringIdeal.
      gVars:Matrix 
         A 1-row matrix containing the variables that correspond to the generators of the module.
    Outputs
@@ -855,34 +840,26 @@ doc ///
         
    Description
      Text
-       This is an implementation of Algorithm 11.24 of "Gröbner Bases and Convex Polytopes" by Bernd Sturmfels. (DOI: 
-       http://dx.doi.org/10.1090/ulect/008)
-       
-       To understand how this function works, recall computing a Gröbner Basis can be thought of as a generalization
-       of Gaussian elimination. This function works the same way as the function @TO (groebnerBasis,Matrix)@, except
-       the "field of scalars" is a subring.
+       This is an implementation of Algorithm 11.24 of "Gröbner Bases and Convex Polytopes" by Bernd Sturmfels.  This function works similar to the function @TO (groebnerBasis,Matrix)@, except that the "field of scalars" is a subring.
 ///
 
 doc ///
    Key
      (symbol ^, Subring, ZZ)
    Headline
-     Construct a subring that can be thought of as a free module over another subring.
+     Construct a product subring.
    Inputs
      subR:Subring
-         The subring to construct a free module over.
+         the subring used to construct a product.
      n:ZZ
-     	 The number of free generators.
+     	 the number of copies of the subring.
    Outputs
      result:Subring
    Usage 
      result = subR^n
    Description
      Text
-       The resulting subring has  @TT "n"@ distinguished "upper variables" that correspond to free module generators 
-       
-       This function is provided as an example of what a free module would be in this package's experimental system
-       for handling modules. 
+       The resulting subring has  @TT "n"@ distinguished variables that correspond to module generators.
        
    SeeAlso
     "Experimental feature: modules over subrings"
@@ -898,10 +875,9 @@ doc ///
      Returns the ambient ring (ring containing the generators) of a subring.
    Inputs
      subR:Subring
-       Any @TO "Subring"@ instance. 
    Outputs
      amb:PolynomialRing
-       The ambient ring.
+       the ambient ring.
    Usage 
      amb = ambient subR 
    Description
@@ -1131,12 +1107,12 @@ doc ///
      A = subring S
    Inputs
      M:Matrix
-       A one-row matrix whose entries are the generators of the resulting subring.
+       a one-row matrix whose entries are the generators for the constructed @TO "Subring"@.
      L:List 
-       A list whose entries are the generators of the resulting subring.
+       a list of generators for the constructed @TO "Subring"@.
      S:SAGBIBasis
      VarBaseName=>String
-       Determines the symbol used for the variables of the @TT "tensorRing"@ of the resulting @TO "Subring"@ instance.
+       determines the symbol used for the variables of the @TT "tensorRing"@ for the constructed @TO "Subring"@.
    Outputs
      A:Subring
    Description
@@ -1144,12 +1120,11 @@ doc ///
        This function serves as the canonical constructor for the @TO "Subring"@ type.
 
        Generators that are constants are ignored because all subrings are assumed to contain the field of coefficients. An error is 
-       thrown if the given set of generators does not contain atleast one non-constant generator. 
-
-       The generators of a subring need not be reduced. For example, subrings with pairs of duplicated generators are acceptable.
+       thrown if the given set of generators does not contain at least one non-constant generator.  The generators of a subring need not be reduced.
      Example
        gndR = QQ[x];
-       A = subring sagbi subring {x^4+x^3, x^2+x}
+       A = subring {x^4+x^3, x^2+x}
+       subring sagbi A
        (x^3+x^2)%A
 
    SeeAlso
@@ -1167,19 +1142,17 @@ doc ///
      Constructs a computation object from a subring.
    Usage
      B = sagbiBasis S
-     B = sagbiBasis(S,storePending=>b)
-     B = sagbiBasis(S,VarBaseName=>v)
    Inputs
      S:Subring
-     b:Boolean
+     storePending => Boolean
         determines if the pending list (which may be large) is stored internally at the end of a computation.
-     v:String
+     VarBaseName => String
         name to be used internally for variables in the tensor ring.
    Outputs
      B:SAGBIBasis
    Description
      Text
-       This function serves as the canonical constructor --for the @TO "SAGBIBasis"@ type.  It is also the output of the @TO "sagbi"@ function.
+       This function serves as the canonical constructor for the @TO "SAGBIBasis"@ type.  It is also the output of the @TO "sagbi"@ function.
    SeeAlso
      SAGBIBasis
 ///
@@ -1255,7 +1228,7 @@ doc ///
      result:Matrix
    Description
      Text
-        Returns the variables corresponding to the subalgebra generators in the tensor ring of a subring.
+        Returns the variables corresponding to the subalgebra generators in the tensor ring (which is part of the presentation) of a subring.
 ///
 
 doc ///
@@ -1314,7 +1287,7 @@ doc ///
      result:Ring
    Description
      Text
-        Returns the tensor ring of the subring
+        Returns the tensor ring of the subring (which is part of the presentation of the subring)
 ///
 
 doc ///
