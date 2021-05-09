@@ -399,9 +399,12 @@ doc ///
      The type of all subrings
    Description
      Text
-       The function @TO "subring"@ serves as the constructor of the @TO "Subring"@ type. 
        
-       Every subring instance is guaranteed to have the following keys:
+       @TT "Subring"@ is a type that stores various information associated with a subring of a polynomial ring such as a set of subring generators and a reference to the polynomial ring it is contained in.
+              
+       The type @TT "Subring"@ is not to be confused with the function @TO "subring"@, which is used to create instances of the @TT "Subring"@ type.
+       
+       Every instance of @TT "Subring"@ is guaranteed to have the following keys:
        
        @UL {
 	    {BOLD {"ambientRing"}, ": The polynomial ring that contains the subring instance's generators."},
@@ -413,8 +416,7 @@ doc ///
        
        The state of the cache should not effect the value of a computation as long as it has not been corrupted. For example, some functions assume that the cache contains specific keys and will throw
        errors if those keys are not present. 
-           
-   Caveat
+
    SeeAlso
        subring
        PresRing
@@ -824,7 +826,7 @@ doc ///
      extrinsicBuchberger
      (extrinsicBuchberger, Subring, Matrix)
    Headline
-     Computes a Gröbner basis of an ideal within a @TO "Subring"@.
+     Computes a Gröbner basis of an ideal within a subring.
    Usage
      extrinsicBuchberger(M, gVars)
    Inputs
@@ -1187,28 +1189,30 @@ doc ///
 
 doc ///
    Key
-     isSagbi
-     (isSagbi,Subring)
-     (isSagbi,Matrix)
-     (isSagbi,List)
+     verifySagbi
+     (verifySagbi, Subring)
+     (verifySagbi, Matrix)
+     (verifySagbi, List)
    Headline
      Test if the generators form sagbi basis
    Usage
-     result = isSagbi subR
+     result = verifySagbi subR
    Inputs
      subR:Subring
    Outputs
-     result:Boolean
-       true or false, depending on whether or not the generators are a SAGBI basis with respect to the term order.
+     result:Subring
+       A copy of subR with the isSAGBI flag set to the correct value.
    Description
      Example
        R = QQ[x,y,z];
-       L = {y*(x-1), y*x^2, y*(x^3+x^2+x+1), y^2};
-       isSagbi L
-       M = {x+y+z,x*y+x*z+y*z, x*y*z, (x-y)*(x-z)*(y-z)};
-       isSagbi M
-       N = {x+y+z,x*y+x*z+y*z, x*y*z};
-       isSagbi N
+       L = subring {y*(x-1), y*x^2, y*(x^3+x^2+x+1), y^2};
+       L#"isSAGBI"
+       L = verifySagbi L;
+       L#"isSAGBI"
+       M = verifySagbi {x+y+z,x*y+x*z+y*z, x*y*z, (x-y)*(x-z)*(y-z)};
+       M#"isSAGBI"
+       N = verifySagbi {x+y+z, x*y+x*z+y*z, x*y*z};
+       N#"isSAGBI"
 ///
       
 doc ///

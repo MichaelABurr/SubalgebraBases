@@ -7,7 +7,7 @@ export {
     "storePending",
     "SAGBIBasis",
     "sagbiBasis",
-    "isSagbi",
+    "verifySagbi",
     "sagbiDone",
     "internalSubduction",
     "subduction",

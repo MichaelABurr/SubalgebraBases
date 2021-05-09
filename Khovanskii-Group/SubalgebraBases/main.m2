@@ -243,15 +243,18 @@ sagbi(SAGBIBasis) := o -> S -> (
     sagbiBasis(storePending => o.storePending,compTable)
 );
 
+
 -- checks whether or not the generators form a sagbi basis wrt the given term order
-isSagbi = method()
-isSagbi Subring := S -> (
+verifySagbi = method()
+verifySagbi Subring := S -> (
     presS := S#"presentation";
     IA := presS#"syzygyIdeal";
     GBIA := gens gb IA;
     monomialSyzygies := selectInSubring(1, GBIA);
     remainders := compress subduction(gens S, presS#"fullSubstitution" monomialSyzygies);
-    numcols remainders == 0
+    HT := new MutableHashTable from S;
+    HT#"isSAGBI" = (numcols remainders == 0);
+    new Subring from HT
     )
-isSagbi Matrix := M -> isSagbi subring M
-isSagbi List := L -> isSagbi subring L
+verifySagbi Matrix := M -> verifySagbi subring M
+verifySagbi List := L -> verifySagbi subring L
