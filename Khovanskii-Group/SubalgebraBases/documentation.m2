@@ -506,7 +506,7 @@ doc ///
 	    {BOLD {"ambientRing"}, ": The polynomial ring that contains the subring instance's generators."},
 	    {BOLD {"generators"}, ": A one-row matrix, the generators of the subring."},
 	    {BOLD {"isSAGBI"}, ": A boolean that is false by default. This flag is only set to true in subring instances resulting from a Sagbi computation that terminated successfully. If this is true, the generators are a Sagbi basis."},
-	    {BOLD {"presentation"}, ": An instance of the ", TO "PresRing", " type immutably associated with the subring's generators."},
+	    {BOLD {"presentation"}, ": An instance of the ", TO "PresRing", " type associated with the subring's generators."},
 	    {BOLD {"cache"}, ": Contains unspecified information. The contents of the cache may effect performance, but should never effect the result of a computation."}
 	   }@
 
@@ -525,8 +525,20 @@ doc ///
      The type of all sagbi bases
    Description
      Text
-        This is a computation object for sagbi bases.  It stores a partial sagbi computation for picking up a computation where it left off.
-   SeeAlso
+        This is a computation object for sagbi bases.  It stores a partial sagbi computation for picking up a computation where it left off.  An instance of a @TT "SAGBIBasis"@ is constructed with the function @TO "sagbiBasis"@ and as the output of @TO "sagbi"@.
+
+        Every instance of @TT "SAGBIBasis"@ is guaranteed to have the following keys:
+
+        @UL {
+        {BOLD {"ambientRing"}, ": The polynomial ring that contains the subring instance's generators."},
+        {BOLD {"subringGenerators"}, ": A one-row matrix, the generators of the subring."},
+        {BOLD {"sagbiGenerators"}, ": A one-row matrix, the currently computed sagbi generators."},
+        {BOLD {"sagbiDegrees"}, ": A one-row matrix, the degrees of the sagbi generators."},
+        {BOLD {"sagbiDone"}, ": A flag that indicates whether the sagbi computation has completed."},
+        {BOLD {"stoppingData=>limit"}, ": An integer containing the degree ", TO "Limit", " for the binomial S-pairs that are computed in the sagbi computation."},
+        {BOLD {"presentation"}, ": An instance of the ", TO "PresRing", " type associated with the subring's generators."},
+        {BOLD {"pending, stoppingData=>degree"}, ": Internal data used for restarting the sagbi computation."}
+        }@
 ///
 
 doc ///
