@@ -145,10 +145,10 @@ doc ///
     	R = QQ[t_(1,1)..t_(3,3),MonomialOrder=>Lex];
 	M = genericMatrix(R,3,3);
     	A = subring gens minors(2, M);	
-	isSagbi A
+	(verifySagbi A)#"isSAGBI"
 	S = sagbi A;
     	gS = gens S
-	isSagbi gS
+	(verifySagbi gS)#"isSAGBI"
    Caveat
    SeeAlso
         subalgebraBasis
