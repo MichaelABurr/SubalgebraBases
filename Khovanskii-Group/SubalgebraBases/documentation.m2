@@ -772,7 +772,7 @@ doc ///
    Headline
      Convert a module as a matrix to a subring ideal.
    Usage
-     result = mingensSubring(subR, M)
+     (moduleSubR,result,gVars) = mingensSubring(subR, M)
    Inputs
      subR:Subring
      	 whose generators are a sagbi basis
@@ -780,7 +780,7 @@ doc ///
      	 whose elements are in subR.
    Outputs
      moduleSubR:Subring
-     result2:Matrix
+     result:Matrix
      	a one-column matrix whose entries are the generators of the subring ideal.
      gVars:Matrix
      	a one-row matrix whose entries are the generators of the module.
