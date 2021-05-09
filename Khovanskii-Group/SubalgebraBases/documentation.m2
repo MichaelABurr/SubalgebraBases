@@ -51,6 +51,7 @@ doc ///
   SeeAlso
     "Experimental feature: SAGBI bases of subrings of quotient rings"
     "Experimental feature: modules over subrings"
+    "Example: Translation and rotation sub-actions of the adjoint action of SE(3)"
 ///
 
 doc ///
@@ -155,7 +156,95 @@ doc ///
 ///
 
 
+doc /// 
+    Key
+        "Example: Translation and rotation sub-actions of the adjoint action of SE(3)"
+    Description
+        Text
+	    The following example shows how to use this package to calculate the invariants of the translation sub-action of
+	    the adjoint action of $SE(3)$. 
+	    
+	    For more information, see the following paper by Crook and Donelon:  @HREF "https://arxiv.org/abs/2001.05417"@	    
+    	Example
+	    translation_invariants = () -> (
+            	gndR = QQ[(t_1..t_3)|(w_1..w_3)|(v_1..v_3), MonomialOrder => Lex];
+	    	G = vars gndR;
+	    	t = transpose G_{0..2};
+	    	w = transpose G_{3..5};
+	    	v = transpose G_{6..8};
+	    	plucker := w||v;
+	    	T = genericSkewMatrix(gndR, G_(0,0), 3);
+	    	zed = T-T;  
+	    	I = id_(source zed);
+	    	translation := matrix({{I, zed},{T, I}})*plucker;
+	    	sag2 = sagbi transpose translation;
+	    	debugPrintMat gens sag2;
+	    	);
+       	    translation_invariants()
+        Text
+    	    The above is precisely the 5 invariants Crook and Donelon give in equation (9), plus the additional 6th invariant.
+	    
+	    The following compuation verifies Theorem 2 of Crook and Donelan (in the case of m=3.)
+        Example
+	    rotation_invariants = () -> (
+    		R = QQ[x_1..x_9, MonomialOrder => Lex];
+    		M = transpose genericMatrix(R, first gens R, 3, 3);
+    		A = (M*(transpose M))-(id_(source M));
+    		B = (det M) - 1;
+    		eqns := (flatten entries A)|{B};
+    		sag1 = subring sagbi eqns;
+		debugPrintMap sag1#"presentation"#"fullSubstitution";
+    		);
+	    rotation_invariants()
+	Text 
+	    In order to interpret the output of this computation, it is neccessary to understand something about how this package's
+	    @TO "Subring"@ type works. 
+	
+	    The @TT "tensorRing"@ of a @TT "Subring"@ instance is a @TO "PolynomialRing"@ with indeterminants divided into 
+	    two blocks: the @ITALIC "upper variables"@ and the @ITALIC "lower variables"@. The lower variables correspond to the 
+	    indeterminants of the @ITALIC "ambient ring"@ (the polynomial ring that the subring's generators are contained in) while
+	    the upper variables correspond to generators of the subring.
+	    
+	    The @TT "tensorRing"@ and various maps associated with it are stored in an instance of the type @TO "PresRing"@ which is found under
+	    the key @TT "presentation"@ in all instances of the type @TO "Subring"@. The reason for this is because the tensor ring and its various
+	    maps are convenient in many kinds of subring computations. Hence, the advantage of using the @TO "Subring"@ type over simply storing a 
+	    list of subring generators is that the @TO "Subring"@ constructor (i.e., the funciton @TO "subring"@) automatically creates a @TT "tensorRing"@
+	    as well as these various maps.   
+	    
+	    In this case, the lower variables are $p_1,\ldots, p_8$ and the upper variables are $p_9,\ldots, p_{21}$. The output of the
+	    command @TT "debugPrintMap sag1#\"presentation\"#\"fullSubstitution\""@ (an example of which is displayed above) is used here because it
+	    is a compact way of printing the structure of both the ambient ring and the generators of a @TO "Subring"@ instance. 
+	
+	    The following table describes how the generators of @TT "sag1"@ correspond to the form predicted by Theorem 2 of Crook and Donelan:
+	CannedExample		     
+	    The dot products of (5):
 
+	    p_18    11
+	    p_11    22
+	    p_9     33
+	    p_15    12
+	    p_10    23
+	    p_13    13
+
+	    The 2x2 minors of the matrix of scalar products:
+
+	    p_12    (diagonal)
+	    p_16
+	    p_17
+	    p_18
+	    p_19    (diagonal)
+	    p_20
+	    p_21    (diagonal)
+
+	    The 3x3 determinant of (5):
+	    
+	    p_14
+
+    SeeAlso
+      (moduleToSubringIdeal, Subring, Matrix)
+      (mingensSubring, Subring, Matrix)
+      (symbol ^, Subring, ZZ)
+///
 doc /// 
     Key
         "Experimental feature: SAGBI bases of subrings of quotient rings"
