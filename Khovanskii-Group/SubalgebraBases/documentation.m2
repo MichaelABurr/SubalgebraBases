@@ -45,12 +45,14 @@ doc ///
       conditions and applications to tame automorphisms, in Effective Methods
       in Algebraic Geometry, Castiglioncello 1990, pp. 379-400,
       Progress in Math. 94 Birkhauser, Boston (1991)",
+      "Stillman, Michael, and Harrison Tsai. Using SAGBI bases to compute invariants. J. Pure and Appl. Alg., 1999, pp.~285--302.",
       "B. Sturmfels, Groebner bases and Convex Polytopes, Univ. Lecture
       Series 8, Amer Math Soc, Providence, 1996"
       }@
   SeeAlso
     "Experimental feature: SAGBI bases of subrings of quotient rings"
     "Experimental feature: modules over subrings"
+    "Example: Translation and rotation sub-actions of the adjoint action of SE(3)"
 ///
 
 doc ///
@@ -156,42 +158,102 @@ doc ///
 ///
 
 
+doc /// 
+    Key
+        "Example: Translation and rotation sub-actions of the adjoint action of SE(3)"
+    Description
+        Text
+	    The following example shows how to use this package to calculate the invariants of the translation sub-action of
+	    the adjoint action of $SE(3)$. 
+	    
+	    For more information, see the following paper by Crook and Donelon:  @HREF "https://arxiv.org/abs/2001.05417"@	    
+    	Example
+	    translation_invariants = () -> (
+            	gndR = QQ[(t_1..t_3)|(w_1..w_3)|(v_1..v_3), MonomialOrder => Lex];
+	    	G = vars gndR;
+	    	t = transpose G_{0..2};
+	    	w = transpose G_{3..5};
+	    	v = transpose G_{6..8};
+	    	plucker := w||v;
+	    	T = genericSkewMatrix(gndR, G_(0,0), 3);
+	    	zed = T-T;  
+	    	I = id_(source zed);
+	    	translation := matrix({{I, zed},{T, I}})*plucker;
+	    	sag2 = sagbi transpose translation;
+	    	debugPrintMat gens sag2;
+	    	);
+       	    translation_invariants()
+        Text
+    	    The above is precisely the 5 invariants Crook and Donelon give in equation (9), plus the additional 6th invariant.
+	    
+	    The following compuation verifies Theorem 2 of Crook and Donelan (in the case of m=3.)
+        Example
+	    rotation_invariants = () -> (
+    		R = QQ[x_1..x_9, MonomialOrder => Lex];
+    		M = transpose genericMatrix(R, first gens R, 3, 3);
+    		A = (M*(transpose M))-(id_(source M));
+    		B = (det M) - 1;
+    		eqns := (flatten entries A)|{B};
+    		sag1 = subring sagbi eqns;
+		debugPrintMap sag1#"presentation"#"fullSubstitution";
+    		);
+	    rotation_invariants()
+	Text 
+	    In order to interpret the output of this computation, it is neccessary to understand something about how this package's
+	    @TO "Subring"@ type works. 
+	
+	    The @TT "tensorRing"@ of a @TT "Subring"@ instance is a @TO "PolynomialRing"@ with indeterminants divided into 
+	    two blocks: the @ITALIC "upper variables"@ and the @ITALIC "lower variables"@. The lower variables correspond to the 
+	    indeterminants of the @ITALIC "ambient ring"@ (the polynomial ring that the subring's generators are contained in) while
+	    the upper variables correspond to generators of the subring.
+	    
+	    The @TT "tensorRing"@ and various maps associated with it are stored in an instance of the type @TO "PresRing"@ which is found under
+	    the key @TT "presentation"@ in all instances of the type @TO "Subring"@. The reason for this is because the tensor ring and its various
+	    maps are convenient in many kinds of subring computations. Hence, the advantage of using the @TO "Subring"@ type over simply storing a 
+	    list of subring generators is that the @TO "Subring"@ constructor (i.e., the funciton @TO "subring"@) automatically creates a @TT "tensorRing"@
+	    as well as these various maps.   
+	    
+	    In this case, the lower variables are $p_1,\ldots, p_8$ and the upper variables are $p_9,\ldots, p_{21}$. The output of the
+	    command @TT "debugPrintMap sag1#\"presentation\"#\"fullSubstitution\""@ (an example of which is displayed above) is used here because it
+	    is a compact way of printing the structure of both the ambient ring and the generators of a @TO "Subring"@ instance. 
+	
+	    The following table describes how the generators of @TT "sag1"@ correspond to the form predicted by Theorem 2 of Crook and Donelan:
+	CannedExample		     
+	    The dot products of (5):
 
+	    p_18    11
+	    p_11    22
+	    p_9     33
+	    p_15    12
+	    p_10    23
+	    p_13    13
+
+	    The 2x2 minors of the matrix of scalar products:
+
+	    p_12    (diagonal)
+	    p_16
+	    p_17
+	    p_18
+	    p_19    (diagonal)
+	    p_20
+	    p_21    (diagonal)
+
+	    The 3x3 determinant of (5):
+	    
+	    p_14
+
+    SeeAlso
+      (moduleToSubringIdeal, Subring, Matrix)
+      (mingensSubring, Subring, Matrix)
+      (symbol ^, Subring, ZZ)
+///
 doc /// 
     Key
         "Experimental feature: SAGBI bases of subrings of quotient rings"
     Description
         Text
-          The SAGBI algorithm implementation used in this package was originally written by Mike Stillman in approximately 1999
-	  for the purpose of implementing concepts from the paper "Using SAGBI bases to compute invariants" by Stillman and Tsai.
-	  Namely, the purpose was to be capable of calculating Sagbi bases of subrings contained in quotient rings. 
-	  The code still retains this capability, but there are
-	  some pecularities. Consider the following example: 
-	  
-	Example
-	  gndR = QQ[x,y, MonomialOrder => Lex];
-	  I = ideal(x^2 - x*y);
-	  Q = gndR/I;
-	  subR = sagbi subring {x};
-	  gens subR
-	  
-	Text 
-	
-	  Because $x^2 = xy$ inside of the quotient ring $\mathbb{Q}[x,y]/(x)$, the resulting Sagbi basis $(x)$ cannot be correct because
-	  it does not involve $y$.
-	
-	  In this example, the algorithm terminated successfully because it has no way of knowing that $x^2 = xy$ inside of the
-	  ambient ring of subR. Technically, one could argue that this isn’t a bug because it’s actually doing what it is
-	  supposed to do according to the specification. Notice that the Sagbi algorithm’s proof of correctness in Proposition 3
-	  of "Using SAGBI bases to compute invariants" by Stillman and Tsai does not apply when a finite Sagbi basis doesn’t exist. 
-	  So, fixing this “bug” is really a question of whether or not it is possible to improve upon the underlying algorithm.
-	  
-	  What this means is that it is possible for the Sagbi algorithm to falsely succeed when the ambient ring is a quotient ring. 
-	  However, when a finite SAGBI basis does happen to exist, the algorithm *should* be able to calculate it correctly given enough
-	  time.
-	  
-	  The following is an example of a correct Sagbi computation over a subring of a quotient ring. It is an implementation of
-	  Example 2 of Stillman and Tsai in the case $N=4$. 
+	  The paper "Using SAGBI bases to compute invariants" by Stillman and Tsai describes algorithms for computing Sagbi bases of subrings contained in quotient rings. 
+	  The following code demonstrates Example 2 from that paper (in the case $N=4$.)
 	CannedExample
 	  N = 4;
 	  gndR = QQ[(a,b,c,d)|(u_1..u_N)|(v_1..v_N), MonomialOrder => Lex];
@@ -209,8 +271,18 @@ doc ///
      		  a*d*u_1*v_4-a*d*u_4*v_1-b*c*u_1*v_4+b*c*u_4*v_1, a*d*u_1*v_3-a*d*u_3*v_1-b*c*u_1*v_3+b*c*u_3*v_1,
      		  a*d*u_1*v_2-a*d*u_2*v_1-b*c*u_1*v_2+b*c*u_2*v_1}}
 	  assert (gens sag == ans);
-    SeeAlso
-    	
+        Text
+	  In general, when a finite SAGBI basis does happen to exist, the algorithm *should* be able to calculate it correctly given enough
+	  time.
+	  However, there are some peculiarities in the case of quotient rings, such as ``false termination" Example 1 from the same paper:
+	Example
+	  gndR = QQ[x,y, MonomialOrder => Lex];
+	  I = ideal(x^2 - x*y);
+	  Q = gndR/I;
+	  subR = sagbi subring {x};
+	  gens subR
+	Text 
+	  Although the initial algebra in this example is infinitely generated, new generators are not generated as expected from S-pairs.
 ///
 doc /// 
     Key
