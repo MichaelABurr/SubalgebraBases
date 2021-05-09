@@ -304,8 +304,8 @@ doc ///
 	        @TT "p_1"@, ..., @TT "p_9"@ are the variables of what is refered to in the code as the @TT "tensorRing"@,
             which has two types of variables: The variables corresponding to the variables in the @TO "ambient"@ ring and the variables corresponding to the generators of the @TO "Subring"@
 	  
-	        The following command converts the toric syzygy module from our example (which is returned by @TT "toricSyz"@ in the form of a matrix) to an ideal
-	        within a subring. This is identical to the @TT "moduleToSubring(subR, tsyz)"@ call that occurs in the first line of @TT "mingensSubring"@.
+	        The function @TO "moduleToSubringIdeal"@ converts the toric syzygy module from our example (which is returned by @TO "toricSyz"@ in the form of a matrix) to an ideal
+	        within a subring. This is identical to the @TO "moduleToSubringIdeal"@ call that occurs in the first line of @TO "mingensSubring"@.
 	CannedExample
 	   i15 : (modRing, idealGens, gVars) = moduleToSubringIdeal(subR, tsyz)
 
@@ -346,17 +346,14 @@ doc ///
 	   maps p_19 to p_0*p_1^2
 	   maps p_20 to p_0^2*p_1
     	Text
-	  The ambient ring of @TT "modRing"@ is the tensor ring of @TT "subR"@, except two new variables @TT "p_10"@ and @TT "p_11"@ have been added.
-	  The variables @TT "p_10"@ and @TT "p_11"@ correspond to the generators of the module. The generators @TT "p_12"@ and @TT "p_13"@ also correspond
-	  to the generators of the module, except they are @ITALIC "upper"@ rather than @ITALIC "lower"@ variables.
+	        The ambient ring of @TT "modRing"@ is the tensor ring of @TT "subR"@, except two new variables @TT "p_10"@ and @TT "p_11"@ have been added.
+	        The variables @TT "p_10"@ and @TT "p_11"@ correspond to the generators of the module. The generators @TT "p_12"@ and @TT "p_13"@ also correspond
+	        to the generators of the module.
 	  
-	  The primary reason why this implementation should be considered experimental is that the monomial order of a module is not fully specified. 
-	  
-	  When a @TO "Subring"@ instance is created using the function @TO "subring"@, the monomial order of the lower variables is the same as the monomial
-	  order of their corresponding variables in the ambient ring while the monomial order of the upper variables is assigned arbitrarily. This monomial 
-	  order is fine for the purposes of basic subring computations that this package's code was originally designed to perform. The problem with this system is 
-	  that it is likely to cause bugs in the case where a subring's ambient ring is the tensor ring of another subring. 
-	  
+            The primary reason why this implementation should be considered experimental is that the monomial order of a module is not fully specified:
+            When a @TO "Subring"@ instance is created using the function @TO "subring"@, the monomial order of the ambient variables is the same as the monomial
+	        order of their corresponding variables in the ambient ring while the monomial order of the variables corresponding to generators is assigned arbitrarily. The problem with this system is
+	        that it is likely to cause bugs in the case where a subring's ambient ring is the tensor ring of another subring.
 	  	 
     SeeAlso
       (moduleToSubringIdeal, Subring, Matrix)
