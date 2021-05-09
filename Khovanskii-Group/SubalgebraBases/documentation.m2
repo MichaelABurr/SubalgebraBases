@@ -45,6 +45,7 @@ doc ///
       conditions and applications to tame automorphisms, in Effective Methods
       in Algebraic Geometry, Castiglioncello 1990, pp. 379-400,
       Progress in Math. 94 Birkhauser, Boston (1991)",
+      "Stillman, Michael, and Harrison Tsai. Using SAGBI bases to compute invariants. J. Pure and Appl. Alg., 1999, pp.~285--302.",
       "B. Sturmfels, Groebner bases and Convex Polytopes, Univ. Lecture
       Series 8, Amer Math Soc, Providence, 1996"
       }@
@@ -251,36 +252,8 @@ doc ///
         "Experimental feature: SAGBI bases of subrings of quotient rings"
     Description
         Text
-          The SAGBI algorithm implementation used in this package was originally written by Mike Stillman in approximately 1999
-	  for the purpose of implementing concepts from the paper "Using SAGBI bases to compute invariants" by Stillman and Tsai.
-	  Namely, the purpose was to be capable of calculating Sagbi bases of subrings contained in quotient rings. 
-	  The code still retains this capability, but there are
-	  some pecularities. Consider the following example: 
-	  
-	Example
-	  gndR = QQ[x,y, MonomialOrder => Lex];
-	  I = ideal(x^2 - x*y);
-	  Q = gndR/I;
-	  subR = sagbi subring {x};
-	  gens subR
-	  
-	Text 
-	
-	  Because $x^2 = xy$ inside of the quotient ring $\mathbb{Q}[x,y]/(x)$, the resulting Sagbi basis $(x)$ cannot be correct because
-	  it does not involve $y$.
-	
-	  In this example, the algorithm terminated successfully because it has no way of knowing that $x^2 = xy$ inside of the
-	  ambient ring of subR. Technically, one could argue that this isn’t a bug because it’s actually doing what it is
-	  supposed to do according to the specification. Notice that the Sagbi algorithm’s proof of correctness in Proposition 3
-	  of "Using SAGBI bases to compute invariants" by Stillman and Tsai does not apply when a finite Sagbi basis doesn’t exist. 
-	  So, fixing this “bug” is really a question of whether or not it is possible to improve upon the underlying algorithm.
-	  
-	  What this means is that it is possible for the Sagbi algorithm to falsely succeed when the ambient ring is a quotient ring. 
-	  However, when a finite SAGBI basis does happen to exist, the algorithm *should* be able to calculate it correctly given enough
-	  time.
-	  
-	  The following is an example of a correct Sagbi computation over a subring of a quotient ring. It is an implementation of
-	  Example 2 of Stillman and Tsai in the case $N=4$. 
+	  The paper "Using SAGBI bases to compute invariants" by Stillman and Tsai describes algorithms for computing Sagbi bases of subrings contained in quotient rings. 
+	  The following code demonstrates Example 2 from that paper (in the case $N=4$.)
 	CannedExample
 	  N = 4;
 	  gndR = QQ[(a,b,c,d)|(u_1..u_N)|(v_1..v_N), MonomialOrder => Lex];
@@ -298,8 +271,18 @@ doc ///
      		  a*d*u_1*v_4-a*d*u_4*v_1-b*c*u_1*v_4+b*c*u_4*v_1, a*d*u_1*v_3-a*d*u_3*v_1-b*c*u_1*v_3+b*c*u_3*v_1,
      		  a*d*u_1*v_2-a*d*u_2*v_1-b*c*u_1*v_2+b*c*u_2*v_1}}
 	  assert (gens sag == ans);
-    SeeAlso
-    	
+        Text
+	  In general, when a finite SAGBI basis does happen to exist, the algorithm *should* be able to calculate it correctly given enough
+	  time.
+	  However, there are some peculiarities in the case of quotient rings, such as ``false termination" Example 1 from the same paper:
+	Example
+	  gndR = QQ[x,y, MonomialOrder => Lex];
+	  I = ideal(x^2 - x*y);
+	  Q = gndR/I;
+	  subR = sagbi subring {x};
+	  gens subR
+	Text 
+	  Although the initial algebra in this example is infinitely generated, new generators are not generated as expected from S-pairs.
 ///
 doc /// 
     Key
