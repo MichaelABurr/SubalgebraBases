@@ -372,11 +372,11 @@ doc ///
      r = f % A
    Inputs
      f:RingElement
-       an element of the ambient ring of $A$ (endowed with some monomial order.)
+       of the ambient ring of $A$ (endowed with some monomial order.)
      A:Subring
    Outputs
      r:RingElement
-       The normal form of f modulo $A$
+       the normal form of f modulo $A$
    Description
      Text
        The result $r$ is zero if and only if $f$ belongs to $A$.  This function should be considered experimental.
@@ -401,20 +401,17 @@ doc ///
    Description
      Text
        
-        @TT "Subring"@ is a type that stores various information associated with a subring of a polynomial ring such as a set of subring generators and a reference to the polynomial ring it is contained in.  An instance of a @TT "Subring"@ is constructed with the function @TO "subring"@.
+        @TT "Subring"@ is a type that stores information associated to a subring of a polynomial ring, such as a set of subring generators and a reference to the polynomial ring it is contained in.  An instance of a @TT "Subring"@ is constructed with the function @TO "subring"@.
        
        Every instance of @TT "Subring"@ is guaranteed to have the following keys:
        
        @UL {
 	    {BOLD {"ambientRing"}, ": The polynomial ring that contains the subring instance's generators."},
 	    {BOLD {"generators"}, ": A one-row matrix, the generators of the subring."},
-	    {BOLD {"isSAGBI"}, ": A boolean that is false by default. Only set to true in subring instances resulting from a Sagbi computation that terminated successfully. If this is true, the generators are a Sagbi basis."},
+	    {BOLD {"isSAGBI"}, ": A boolean that is false by default. This flag is only set to true in subring instances resulting from a Sagbi computation that terminated successfully. If this is true, the generators are a Sagbi basis."},
 	    {BOLD {"presentation"}, ": An instance of the ", TO "PresRing", " type immutably associated with the subring's generators."},
 	    {BOLD {"cache"}, ": Contains unspecified information. The contents of the cache may effect performance, but should never effect the result of a computation."}
 	   }@
-       
-       The state of the cache should not effect the value of a computation as long as it has not been corrupted. For example, some functions assume that the cache contains specific keys and will throw
-       errors if those keys are not present. 
 
    SeeAlso
        subring
@@ -439,30 +436,25 @@ doc ///
    Key
      PresRing
    Headline
-     Stores maps and other information associated with the lifted presentation ring (a.k.a. "tensorRing") of a subring instance.
+     Stores data on the lifted presentation ring of a subring.
    Description
      Text
-       This type is not intended to be used outside of the @TO "Subring"@ type. The primary reason why this is a separate type in the first place is to keep the @TO "Subring"@ type human-readable.
-       Namely, the @TO "PresRing"@ type has an overloaded @TO "net"@ method that prevents @TT "(peek, Subring)"@ from flooding the screen. 
-       
-       The information that the @TO "PresRing"@ type contains about a @TO "Subring"@ instance is related to the @ITALIC "lifted presentation ring"@ of a subring. In the code, the
-       lifted presentation of a subring is referred to as the @TT "tensorRing"@. 
-       
-       
+       The @TO "PresRing"@ type contains about a @TO "Subring"@ instance is related to the @ITALIC "lifted presentation ring"@ of a subring. In the code, the lifted presentation of a subring is referred to as the @TT "tensorRing"@.
+
        An instance of the  @TO "PresRing"@ type contains the following keys:
        
        @UL {
 	    {BOLD {"tensorRing"}, ": The lifted presentation ring of the given subring."},
 	    {BOLD {"sagbiInclusion"}, ": A map from ", TT {"tensorRing"}, " to ", TT {"tensorRing"}},
-	    {BOLD {"projectionAmbient"},  ": A map from ", TT {"tensorRing"}, " to the ambient ring."},
-	    {BOLD {"inclusionAmbient"},  ": A map from the ambient ring to ", TT {"tensorRing"}},
+        {BOLD {"projectionAmbient"},  ": A map from ", TT {"tensorRing"}, " to the ", TT {"ambient ring"}, "."},
+	    {BOLD {"inclusionAmbient"},  ": A map from the ", TT {"ambient ring"}, " to ", TT {"tensorRing"}},
 	    {BOLD {"substitution"}, ": A map from ", TT {"tensorRing"}, " to ", TT {"tensorRing"}},
 	    {BOLD {"fullSubstitution"}, ": Composition of ",TT {"substitution"}, " and ", TT {"projectionAmbient."}},
 	    {BOLD {"syzygyIdeal"}, ": This is used in the function ", TO "sagbi", " to calculate toric syzygies."},
 	    {BOLD {"liftedPres"}, ": This is used in normal form calculations."}
 	   }@
      Text 
-       To understand the various maps stored inside of a @TO "PresRing"@ instance, it is informative to look at the output of @TO "debugPrintAllMaps"@:
+       To understand the maps stored inside of a @TO "PresRing"@ instance, it is informative to look at the output of @TO "debugPrintAllMaps"@:
      CannedExample
        i1 : gndR = QQ[x, y];
 
@@ -496,6 +488,8 @@ doc ///
        maps p_2 to y
        maps p_3 to -x^2+x*y
        maps p_4 to x^2*y
+     Text
+        This type is typically not used externally to @TO "Subring"@ type.
    SeeAlso
        subring
        PresRing
@@ -512,19 +506,17 @@ doc ///
      Perform autoreduction of the generators of an ideal of a subring.
    Inputs
      subR:Subring
-       A subring instance that is a sagbi basis.
+      whose generators are a sagbi basis.
      idealGens:Matrix
-       A one-row matrix whose entries are the elements of subR considered as generators of an ideal $I$. 
+       a one-row matrix whose entries are the elements of subR are generators of an ideal $I$.
    Usage
      result = autoreduce(subR, idealGens)
    Outputs
      result:Matrix
-       The reduced generators of the ideal generated by the entries of M.
+       the reduced generators of the ideal generated by the entries of M.
    Description
      Text
-       Performs autoreduction on the generators of an ideal within a @TO "subring"@.
-       
-       Each generator $g\in M$ is replaced with the normal form of $g$ relative to $M\setminus \{g\}$, computed using
+       Performs autoreduction on the generators of an ideal within a @TO "subring"@.  Iteratively, each generator $g\in M$ is replaced with the normal form of $g$ relative to $M\setminus \{g\}$, computed using
        the function @TO "intrinsicReduce"@.
 
    SeeAlso
@@ -535,41 +527,37 @@ doc ///
      subduction
      (subduction, Matrix, RingElement)
      (subduction, Matrix, Matrix)
-     (symbol %, Matrix, Subring)
    Headline
-     Performs subduction relative to the generators of a subring.
+     Performs subduction by the generators of a subring.
    Inputs
-     subR:Subring
      f:RingElement
-         An element of the tensor ring or ambient ring of f.
+         an element of @TO "ring"@ @TT "M"@.
      M:Matrix
-     	 A one-row matrix containing elements of the tensor ring or ambient ring of f.
+     	 a one-row matrix containing elements @TO "ring"@ @TT "M"@.
      subGens:Matrix
-     	 A one-row matrix containing elements of the tensor ring or ambient ring of f.
+     	 a one-row matrix containing elements @TO "ring"@ @TT "M"@.
    Outputs
      result:RingElement
-       An element of the tensor ring of subR
+       of @TO "ring"@ @TT "M"@
      resultMat:Matrix
+        of elements of @TO "ring"@ @TT "M"@
    Usage 
-     result = subduction(subR, f)
-     resultMat = subduction(subR, M)
-     resultMat = M % subR
+     result = subduction(subGens, f)
+     resultMat = subduction(subGens, M)
    Description
      Text
+       Performs subduction of the second argument by the elements of @TT "subGens"@.
        If the second argument is a one-row matrix, subduction is performed on each entry 
        individually and the resulting one-row matrix is returned. If the second argument is
        a ring element @TT "f"@, subduction is performed on @TT "f"@ and the result is returned.
-
-       The subring @TT "subR"@ is not required to be a Sagbi basis. The reasoning behind this is
-       because it is not neccessary for the set of subring generators to be a Sagbi basis in order
-       for the subduction algorithm to be well-defined.
+       The generators of @TT "subR"@ are not required to be a Sagbi basis.
             
      Example
        gndR = QQ[symbol t_1, symbol t_2, symbol t_3];
        G = matrix {{t_1^4*t_2^4*t_3^4, (t_1^8)*t_2*t_3^8}}
        subduction(G, G_(0,0))
        subduction(G, G_(0,0)*G_(0,1) + t_1)
-       f = subduction(G, t_1)
+       subduction(G, t_1)
 ///
 
 doc ///
@@ -588,7 +576,7 @@ doc ///
         generated by the autosubduced generators of subR.
    Description
      Text
-       Iteratively replaces each generator $g$ of @TT "subR"@ with the result of subducing @TT "g"@ against (@TT "(gens,Subring)"@ @TT "subR"@)$\setminus \{g\}$.
+       Iteratively replaces each generator $g$ of @TT "subR"@ with the result of subducing @TT "g"@ by (@TT "(gens,Subring)"@ @TT "subR"@)$\setminus \{g\}$.
        
    SeeAlso
      autoreduce
@@ -600,7 +588,7 @@ doc ///
      isSubalg
      (isSubalg, Subring, Subring)
    Headline
-     Calculates whether a given subring is contained in another subring.
+     Calculates whether one subring is contained in another subring.
    Usage
      result = intrinsicReduce(A, B)
    Inputs
@@ -608,10 +596,10 @@ doc ///
      B:Subring
    Outputs
      result:Boolean
-    	Whether or not the subring A is contained in the subring B. 
+    	whether or not the subring A is contained in the subring B.
    Description
      Text
-       This function tests that each of the generators of the subring A have a normal form of zero with respect to B.
+       This function tests that each of the generators of the subring @TT "A"@ have a normal form of zero with respect to @TT "B"@.
      Example
        R = QQ[t_1, t_2]
        A = subring matrix(R, {{t_1^2, t_1*t_2}});
@@ -910,10 +898,9 @@ doc ///
      Returns the number of generators of a subring.
    Inputs
      subR:Subring
-       Any Subring instance. 
    Outputs
      n:ZZ
-       The number of generators of subR.
+       the number of generators of subR.
    Usage 
      n = numgens subR
    Description
@@ -1214,21 +1201,24 @@ doc ///
      internalSubduction
      (internalSubduction,PresRing,Matrix)
      (internalSubduction,PresRing,RingElement)
+     (symbol %, Matrix, Subring)
    Headline
      Performs subduction from a presentation ring
    Usage
      result = internalSubduction(presR,relem)
      result = internalSubduction(presR,M)
+     resultMat = M % subR
    Inputs
      presR:PresRing
      relem:RingElement
      M:Matrix
         A matrix of ring elements to be subducted
+     subR:Subring
    Outputs
      result:Matrix
    Description
      Text
-        Performs subduction of the @TO "RingElement"@ or the entries of the @TO "Matrix"@ against the content of the @TO "PresRing"@.  This is typically an internal call for cases where the @TO "PresRing"@ is explicitly specified, and @TO "subduction"@, @TO "autosubduce"@, @TO "autoreduce"@ are more appropriate for the user.
+        Performs subduction of the @TO "RingElement"@ or the entries of the @TO "Matrix"@ by the content of the @TO "PresRing"@.  This is typically an internal call for cases where the @TO "PresRing"@ is explicitly specified, and @TO "subduction"@, @TO "autosubduce"@, @TO "autoreduce"@ are more appropriate for the user.  The behavior of @TT "%"@ may change in future releases.
    SeeAlso
      subduction
      autosubduce
