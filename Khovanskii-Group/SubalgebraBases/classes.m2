@@ -137,6 +137,7 @@ makePresRing(Ring, List) := opts -> (R, gensR) ->(
     );
 
     ambR := R;
+    coeffQuotient := ideal ambR;
     nBaseGens := numgens ambR;
     nSubalgGens := length gensR;
 
@@ -156,6 +157,11 @@ makePresRing(Ring, List) := opts -> (R, gensR) ->(
     MonomialOrder => newOrder];
 
     tensorRing := coeffField newVariables;
+    
+    tempInclusionAmbient := map(tensorRing,ambient ambR,
+	(vars tensorRing)_{0..nBaseGens-1});
+
+    tensorRing = tensorRing / tempInclusionAmbient ideal leadTerm coeffQuotient; 
 
     sagbiInclusion := map(tensorRing, tensorRing,
     (matrix {toList(nBaseGens:0_(tensorRing))}) |
