@@ -10,6 +10,7 @@ export {
     "verifySagbi",
     "sagbiDone",
     "internalSubduction",
+    "topLevelSubduction",
     "subduction",
     "subalgebraBasis",
     "sagbi",

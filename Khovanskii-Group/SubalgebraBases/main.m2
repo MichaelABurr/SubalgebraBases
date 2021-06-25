@@ -5,16 +5,34 @@ debug Core -- gets rid of "raw" error during installation. probably a better way
 
 subduction = method(TypicalValue => RingElement)
 subduction(Matrix, RingElement) := (M, f) -> (
+    
+    -*
     pres := makePresRing(ring M, M);
     result := pres#"fullSubstitution" internalSubduction(pres, f);
     result
-    )
+    *-
+    
+    G := flatten entries M;
+    result := topLevelSubduction(G, f);
+    
+    );
+
 subduction(Matrix, Matrix) := (M, N) -> (
+    
+    -*
     pres := makePresRing(ring M, M);	
     ents := for i from 0 to (numcols N)-1 list(
     	pres#"fullSubstitution" internalSubduction(pres, N_(0,i))
 	);
     matrix({ents})
+    *-
+    
+    G := flatten entries M;
+    ents := for i from 0 to (numcols N)-1 list (
+	topLevelSubduction(G, N_(0, i))
+	);
+    matrix({ents})
+    
     );
 
 internalSubduction = method(TypicalValue => RingElement)
@@ -40,9 +58,12 @@ internalSubduction(PresRing, RingElement) := (pres, f) -> (
     F := pres#"substitution";
     M := monoid source pres#"inclusionAmbient";
     numblocks := rawMonoidNumberOfBlocks raw M;
-    fMat := matrix({{pres#"inclusionAmbient"(f)}});    
+    fMat := matrix({{pres#"inclusionAmbient"(f)}});
+    
+    
     result := rawSubduction(numblocks, raw fMat, raw F, raw J);
     result = promote(result_(0,0), tense);    
+    
     
     result
     );
@@ -58,6 +79,73 @@ internalSubduction(PresRing, Matrix) := (pres, M) -> (
 	);
     matrix({ents})
     );
+
+
+-----------------------------------------------------------------
+-- subduction which works for quotients
+-- Top level code for subduction which can handle quotient rings
+-----------------------------------------------------------------
+
+topLevelSubduction = method(TypicalValue => RingElement)
+topLevelSubduction(List, RingElement) := (G, f) -> ( 
+    -- Setup rings, ideals and maps
+    Q := ring f;
+    I := ideal Q;
+    R := ring I;
+    quotientMap := map(Q, R, gens Q);
+    LTI := ideal leadTerm I; 
+    liftG := for g in G list sub(g, R) % I; -- lift G to R 
+    
+    -- We work with a subring S of R and, when necessary, take elements mod LT(I)
+    -------
+    -- TODO:
+    -- change the input to accept a presentation + ring element 
+    -- and we output something in the tensorRing
+    --------
+    S := subring liftG; 
+    syzygyIdeal := S#"presentation"#"syzygyIdeal";
+    inclusionAmbient := S#"presentation"#"inclusionAmbient";
+    projectionAmbient := S#"presentation"#"projectionAmbient";
+    fullSubstitution := S#"presentation"#"fullSubstitution";
+    
+    -- lift LT(I) to the tensorRing
+    tensorRingLTI := inclusionAmbient LTI;
+    g := f;
+    
+    while true do (
+	-- if g is a constant then exit loop
+	if g == 0_Q then break;
+	if degree(g) == {0} then break;
+		
+	liftg := sub(g, R) % I;
+	LTg := (leadTerm liftg) % LTI; 
+	tensorRingLTg := inclusionAmbient(LTg);
+	h := tensorRingLTg % (syzygyIdeal + tensorRingLTI);
+	
+	-- exit the loop if h does not lie in K[p_1 .. p_r]
+	if (projectionAmbient(h) != 0_R and degree(projectionAmbient(h)) != {0}) then break;
+	
+	-- update g
+	hSub := quotientMap fullSubstitution h;
+	g = g - hSub;
+	);
+    
+    -- if g is a constant subduct to 0_Q
+    if g != 0_Q then (
+	if degree(g) == {0} then g = 0_Q;
+	);
+    
+    g
+    );
+
+topLevelSubduction(List, Matrix) := (G, M) -> (	
+    ents := for i from 0 to (numcols M)-1 list(
+    	topLevelSubduction(G, M_(0,i))
+	);
+    matrix({ents})
+    );
+
+
 
 ---------------------------------------------------------------------------------------
 -- subalgebraBasis is needed for legacy purposes. It should not be changed or deleted. 
@@ -153,8 +241,10 @@ sagbi(SAGBIBasis) := o -> S -> (
         sagbiGB = gb(compTable#"presentation"#"syzygyIdeal", DegreeLimit => compTable#"stoppingData"#"degree");
 	terminationCondition1 = rawStatus1 raw sagbiGB == 6;
 	zeroGens = submatByDegree(mingens ideal selectInSubring(1, gens sagbiGB), compTable#"stoppingData"#"degree");
+	
+	-- THIS IS NOT CORRECT IN THE (x^2 - y) EXAMPLE
 	syzygyPairs = compTable#"presentation"#"substitution"(zeroGens);
-
+    	
 	-- Have we previously found any syzygies of degree currDegree?
         if compTable#"pending"#?(compTable#"stoppingData"#"degree") then (
             syzygyPairs = syzygyPairs |
@@ -166,9 +256,28 @@ sagbi(SAGBIBasis) := o -> S -> (
     	    print("-- Performing subduction on S-polys... ");
 	        print("-- Num. S-polys before subduction: " | toString(numcols syzygyPairs));
 	    );
-
-    subducted = internalSubduction(compTable#"presentation", syzygyPairs);
-
+    
+    --------------------------------------------
+    -- NEW Subduction using topLevelSubduction
+    --------------------------------------------
+    -- NOTES:
+    -- 1. we avoid using the syzygyPairs, instead we pass zeroGens
+    --    into Q
+    --
+    
+    G := flatten entries compTable#"sagbiGenerators";
+    syzygyAmbient := compTable#"presentation"#"fullSubstitution" zeroGens;
+    subducted = topLevelSubduction(G, syzygyAmbient);    
+    
+    -- put result back into the tensorRing 
+    if numcols subducted != 0 then (
+    	subducted = compTable#"presentation"#"inclusionAmbient" subducted;
+    	);
+    -----------------
+    --OLD:
+    -- subducted = internalSubduction(compTable#"presentation", syzygyPairs); 
+    ----------------
+    
     if numcols subducted != 0 then (
 	    newElements = compress ((compTable#"presentation"#"projectionAmbient")(subducted));
             ) else (
