@@ -14,6 +14,7 @@ subduction(Matrix, RingElement) := (M, f) -> (
     
     G := flatten entries M;
     result := topLevelSubduction(G, f);
+    result 
     
     );
 
