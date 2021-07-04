@@ -108,6 +108,7 @@ topLevelSubduction(List, RingElement) := (G, f) -> (
     inclusionAmbient := S#"presentation"#"inclusionAmbient";
     projectionAmbient := S#"presentation"#"projectionAmbient";
     fullSubstitution := S#"presentation"#"fullSubstitution";
+    sagbiInclusion := S#"presentation"#"sagbiInclusion";
     
     -- lift LT(I) to the tensorRing
     tensorRingLTI := inclusionAmbient LTI;
@@ -123,8 +124,10 @@ topLevelSubduction(List, RingElement) := (G, f) -> (
 	tensorRingLTg := inclusionAmbient(LTg);
 	h := tensorRingLTg % (syzygyIdeal + tensorRingLTI);
 	
-	-- exit the loop if h does not lie in K[p_1 .. p_r]
-	if (projectionAmbient(h) != 0_R and degree(projectionAmbient(h)) != {0}) then break;
+	projectionh := fullSubstitution sagbiInclusion h;
+	-- exit the loop if h does not lie in K[p_1 .. p_r] <- the variables tagging the generators of S
+	if projectionh == 0_R then break;
+	if degree projectionh == {0} then break;
 	
 	-- update g
 	hSub := quotientMap fullSubstitution h;
@@ -266,6 +269,8 @@ sagbi(SAGBIBasis) := o -> S -> (
     --    into Q
     --
     
+    
+    
     G := flatten entries compTable#"sagbiGenerators";
     syzygyAmbient := compTable#"presentation"#"fullSubstitution" zeroGens;
     subducted = topLevelSubduction(G, syzygyAmbient);    
@@ -274,6 +279,8 @@ sagbi(SAGBIBasis) := o -> S -> (
     if numcols subducted != 0 then (
     	subducted = compTable#"presentation"#"inclusionAmbient" subducted;
     	);
+    
+    
     -----------------
     --OLD:
     -- subducted = internalSubduction(compTable#"presentation", syzygyPairs); 
