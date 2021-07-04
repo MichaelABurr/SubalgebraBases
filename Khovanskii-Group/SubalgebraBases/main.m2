@@ -208,12 +208,26 @@ sagbi(SAGBIBasis) := o -> S -> (
     compTable#"stoppingData" = new MutableHashTable from compTable#"stoppingData";
     compTable#"stoppingData"#"limit" = max {compTable#"stoppingData"#"limit",o.Limit};
     
+    
+    ------------------------
+    -- ignore autosubduce
+    --
+    -- note: autosubduce calls internalSubduction
+    --       for testing topLevelSubduction this next part
+    --       is temporarily commented out
+    -----------------------
+    
+    -*
+    --TEMPORARY
+    
     if o.Autosubduce then(
 	if o.PrintLevel > 0 then (
 	    print("Performing initial autosubduction...");
 	    );
     	compTable#"subringGenerators" = autosubduce compTable#"subringGenerators";
     );
+    
+    *-
     
     if (numcols compTable#"sagbiGenerators" == 0) or (not o.storePending) then (
     	insertPending(compTable, compTable#"subringGenerators");
