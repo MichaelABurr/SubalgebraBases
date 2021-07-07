@@ -88,7 +88,20 @@ internalSubduction(PresRing, Matrix) := (pres, M) -> (
 -----------------------------------------------------------------
 
 topLevelSubduction = method(TypicalValue => RingElement)
-topLevelSubduction(List, RingElement) := (G, f) -> ( 
+topLevelSubduction(List, RingElement) := (G, f) -> (
+    -* 
+    print("");
+    print("--------------------------------");
+    print("-- Call to topLevelSubduction");
+    print("--------------------------------");
+    print("-- List of polys G = ");
+    print(G);
+    print("");
+    print("-- subducting f = ");
+    print(f);
+    *-
+    
+    
     -- Setup rings, ideals and maps
     Q := ring f;
     I := ideal Q;
@@ -96,6 +109,22 @@ topLevelSubduction(List, RingElement) := (G, f) -> (
     quotientMap := map(Q, R, gens Q);
     LTI := ideal leadTerm I; 
     liftG := for g in G list sub(g, R) % I; -- lift G to R 
+    
+    -*
+    print("-- Ambient Ring Q = ");
+    print(Q);
+    print("");
+    print("-- Ideal I = ");
+    print(I);
+    print("");
+    print("-- PolyRing R = ");
+    print(R);
+    print("");
+    print("-- LeadTerm I LTI = ");
+    print(LTI);
+    print("");
+    *-
+    
     
     -- We work with a subring S of R and, when necessary, take elements mod LT(I)
     -------
@@ -138,6 +167,14 @@ topLevelSubduction(List, RingElement) := (G, f) -> (
     if g != 0_Q then (
 	if degree(g) == {0} then g = 0_Q;
 	);
+    -*
+    print("-- output = ");
+    print(g);
+    print("---------------------------------------");
+    print("-- End of call to topLevelSubduction");
+    print("---------------------------------------");
+    print("");
+    *-
     
     g
     );
@@ -245,12 +282,18 @@ sagbi(SAGBIBasis) := o -> S -> (
     local terminationCondition0;
     local terminationCondition1;
     local terminationCondition2;
+    
+    -- TODO: think of a better name:
+    -- tempDegree keeps track of the lowest degree of the newly added sagbi generators
+    local tempDegree; 
 
     while compTable#"stoppingData"#"degree" <= o.Limit and not compTable#"sagbiDone" do (  	
 	if o.PrintLevel > 0 then (
 	    print("---------------------------------------");
 	    print("-- Current degree:"|toString(compTable#"stoppingData"#"degree"));
 	    print("---------------------------------------");
+	    print("-- current state = ");
+	    print(peek compTable);
 	    );
 	
     	if o.PrintLevel > 0 then (
@@ -263,6 +306,33 @@ sagbi(SAGBIBasis) := o -> S -> (
 	-- THIS IS NOT CORRECT IN THE (x^2 - y) EXAMPLE
 	syzygyPairs = compTable#"presentation"#"substitution"(zeroGens);
     	
+	
+	
+	-- Ollie:
+	-- 1) I'm not sure what the "mingens ideal" in the definition
+	--    of zeroGens is doing. We already have a GB wrt an
+	--    elimination order so would it be fine without it?
+	-- 
+	-- 2) For Quotient Rings we can get new polys of the same degree
+	--    appearing in the generators of syzygyIdeal. So I suggest doing:
+	
+	--zeroGens = submatAtMostDegree(mingens ideal selectInSubring(1, gens sagbiGB), compTable#"stoppingData"#"degree");
+	
+	
+	if o.PrintLevel > 0 then (
+	    print("-- syzygyIdeal = ");
+	    print(compTable#"presentation"#"syzygyIdeal");
+	    print("-- gb calculation DegreeLimit = ");
+	    print(compTable#"stoppingData"#"degree");
+	    print("-- gens sagbiGB = ");
+	    print(gens sagbiGB);
+	    print("-- zeroGens = ");
+	    print(zeroGens)
+	    );
+	
+	
+	
+	
 	-- Have we previously found any syzygies of degree currDegree?
         if compTable#"pending"#?(compTable#"stoppingData"#"degree") then (
             syzygyPairs = syzygyPairs |
@@ -300,7 +370,7 @@ sagbi(SAGBIBasis) := o -> S -> (
     -- subducted = internalSubduction(compTable#"presentation", syzygyPairs); 
     ----------------
     
-    if numcols subducted != 0 then (
+        if numcols subducted != 0 then (
 	    newElements = compress ((compTable#"presentation"#"projectionAmbient")(subducted));
             ) else (
 	    newElements = subducted;
@@ -321,12 +391,21 @@ sagbi(SAGBIBasis) := o -> S -> (
         );
 
 	if numcols newElements > 0 then (
+	    
+	    if o.PrintLevel > 0 then(
+	         print("-- New Elements");
+	         print(newElements);
+	         );
+	     
 	    insertPending(compTable, newElements);
-    	    processPending(compTable);
-	    if not lowestDegree(compTable) == infinity then 
-                 compTable#"stoppingData"#"degree" = lowestDegree(compTable)
-                 else
+    	    tempDegree = processPending(compTable);
+	    
+	    -- if not lowestDegree(compTable) == infinity then 
+            if not (tempDegree == infinity) then (  
+                 compTable#"stoppingData"#"degree" = tempDegree;
+                 ) else (
                  compTable#"stoppingData"#"degree" = compTable#"stoppingData"#"degree" + 1;
+		 );
         ) else (
 
         terminationCondition0 = #(compTable#"pending") == 0;
