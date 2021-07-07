@@ -87,9 +87,20 @@ internalSubduction(PresRing, Matrix) := (pres, M) -> (
 -- Top level code for subduction which can handle quotient rings
 -----------------------------------------------------------------
 
-topLevelSubduction = method(TypicalValue => RingElement)
-topLevelSubduction(List, RingElement) := (G, f) -> (
-    -* 
+topLevelSubduction = method(
+    TypicalValue => RingElement,
+    Options => {
+	PrintLevel => 0
+	})
+
+-- PrintLevels:
+--  3+ = displays input and output of subduction
+--  4+ = displays rings and ideals used in computation
+--  5+ = displays the polynomial g throughout the loop
+
+topLevelSubduction(List, RingElement) := o -> (G, f) -> (
+     
+    if o.PrintLevel > 2 then (
     print("");
     print("--------------------------------");
     print("-- Call to topLevelSubduction");
@@ -99,7 +110,7 @@ topLevelSubduction(List, RingElement) := (G, f) -> (
     print("");
     print("-- subducting f = ");
     print(f);
-    *-
+    );
     
     
     -- Setup rings, ideals and maps
@@ -110,7 +121,7 @@ topLevelSubduction(List, RingElement) := (G, f) -> (
     LTI := ideal leadTerm I; 
     liftG := for g in G list sub(g, R) % I; -- lift G to R 
     
-    -*
+    if o.PrintLevel > 3 then (
     print("-- Ambient Ring Q = ");
     print(Q);
     print("");
@@ -123,7 +134,7 @@ topLevelSubduction(List, RingElement) := (G, f) -> (
     print("-- LeadTerm I LTI = ");
     print(LTI);
     print("");
-    *-
+    );
     
     
     -- We work with a subring S of R and, when necessary, take elements mod LT(I)
@@ -144,6 +155,12 @@ topLevelSubduction(List, RingElement) := (G, f) -> (
     g := f;
     
     while true do (
+	
+	if o.PrintLevel > 4 then (
+	    print("-- Current g = ");
+	    print(g);
+	    );
+	
 	-- if g is a constant then exit loop
 	if g == 0_Q then break;
 	if degree(g) == {0} then break;
@@ -167,21 +184,21 @@ topLevelSubduction(List, RingElement) := (G, f) -> (
     if g != 0_Q then (
 	if degree(g) == {0} then g = 0_Q;
 	);
-    -*
+    if o.PrintLevel > 2 then (
     print("-- output = ");
     print(g);
     print("---------------------------------------");
     print("-- End of call to topLevelSubduction");
     print("---------------------------------------");
     print("");
-    *-
+    );
     
     g
     );
 
-topLevelSubduction(List, Matrix) := (G, M) -> (	
+topLevelSubduction(List, Matrix) := o -> (G, M) -> (	
     ents := for i from 0 to (numcols M)-1 list(
-    	topLevelSubduction(G, M_(0,i))
+    	topLevelSubduction(G, M_(0,i), o)
 	);
     matrix({ents})
     );
@@ -237,6 +254,9 @@ sagbi(Subring) := o -> S -> (
 
 -- PrintLevel > 0: Print some information each loop, but don't print any polynomials.
 -- PrintLevel > 1: Print new Sagbi gens.
+-- PrintLevel > 2: Print the compTable state and show the subductions for each loop
+-- PrintLevel > 3: Print more data during each subduction
+-- PrintLevel > 4: Print all steps of subduction
 sagbi(SAGBIBasis) := o -> S -> (
     if (S#"stoppingData"#"limit" > o.Limit) or S#"sagbiDone" then return S;
     
@@ -292,8 +312,10 @@ sagbi(SAGBIBasis) := o -> S -> (
 	    print("---------------------------------------");
 	    print("-- Current degree:"|toString(compTable#"stoppingData"#"degree"));
 	    print("---------------------------------------");
-	    print("-- current state = ");
-	    print(peek compTable);
+	    if o.PrintLevel > 2 then ( 
+	    	print("-- current state = ");
+	    	print(peek compTable);
+	    	);
 	    );
 	
     	if o.PrintLevel > 0 then (
@@ -313,37 +335,43 @@ sagbi(SAGBIBasis) := o -> S -> (
 	--    of zeroGens is doing. We already have a GB wrt an
 	--    elimination order so would it be fine without it?
 	-- 
-	-- 2) For Quotient Rings we can get new polys of the same degree
-	--    appearing in the generators of syzygyIdeal. So I suggest doing:
+	-- 2) Previous I suggested doing:
+	--      zeroGens = submatAtMostDegree(mingens ideal selectInSubring(1, gens sagbiGB), compTable#"stoppingData"#"degree");
+	--    however, instead we found that the problem was in the degree update
+	--    we now set the degree to be the smallest degree of any new sagbi generator
 	
-	--zeroGens = submatAtMostDegree(mingens ideal selectInSubring(1, gens sagbiGB), compTable#"stoppingData"#"degree");
-	
-	
-	if o.PrintLevel > 0 then (
+	if o.PrintLevel > 2 then (
 	    print("-- syzygyIdeal = ");
 	    print(compTable#"presentation"#"syzygyIdeal");
 	    print("-- gb calculation DegreeLimit = ");
 	    print(compTable#"stoppingData"#"degree");
 	    print("-- gens sagbiGB = ");
 	    print(gens sagbiGB);
-	    print("-- zeroGens = ");
-	    print(zeroGens)
 	    );
-	
-	
-	
-	
-	-- Have we previously found any syzygies of degree currDegree?
+    
+    
+    -*
+    -- THIS PART IS MOVED INTO THE NEW topLevelSubduction
+    
+    -- Have we previously found any syzygies of degree currDegree?
         if compTable#"pending"#?(compTable#"stoppingData"#"degree") then (
             syzygyPairs = syzygyPairs |
                 compTable#"presentation"#"inclusionAmbient"(matrix{toList compTable#"pending"#(compTable#"stoppingData"#"degree")});
-            remove(compTable#"pending", compTable#"stoppingData"#"degree");
+           
+	    remove(compTable#"pending", compTable#"stoppingData"#"degree");
+	    
+	    
+	    print("-- more syzygyPairs");
+	    print(syzygyPairs);
             );
 
 	if o.PrintLevel > 0 then(
     	    print("-- Performing subduction on S-polys... ");
 	        print("-- Num. S-polys before subduction: " | toString(numcols syzygyPairs));
 	    );
+    *-	
+    
+    
     
     --------------------------------------------
     -- NEW Subduction using topLevelSubduction
@@ -352,12 +380,36 @@ sagbi(SAGBIBasis) := o -> S -> (
     -- 1. we avoid using the syzygyPairs, instead we pass zeroGens
     --    into Q
     --
-    
-    
-    
+        
+     
     G := flatten entries compTable#"sagbiGenerators";
     syzygyAmbient := compTable#"presentation"#"fullSubstitution" zeroGens;
-    subducted = topLevelSubduction(G, syzygyAmbient);    
+    
+    -- Have we previously found any syzygies of degree currDegree?
+        if compTable#"pending"#?(compTable#"stoppingData"#"degree") then (
+            syzygyPairs = syzygyPairs |
+                compTable#"presentation"#"inclusionAmbient"(matrix{toList compTable#"pending"#(compTable#"stoppingData"#"degree")});
+            
+	    syzygyAmbient = syzygyAmbient | matrix{toList compTable#"pending"#(compTable#"stoppingData"#"degree")};
+	    
+	    remove(compTable#"pending", compTable#"stoppingData"#"degree");
+	    
+            );
+
+	if o.PrintLevel > 0 then(
+    	    print("-- Performing subduction on S-polys... ");
+	        print("-- Num. S-polys before subduction: " | toString(numcols syzygyPairs));
+	    );
+    
+    
+    if o.PrintLevel > 2 then (
+	print("-- List of elements to be subducted = ");
+	print(syzygyAmbient);
+	print("-- List of elements to subduct w.r.t. =");
+	print(G);
+	);
+    
+    subducted = topLevelSubduction(G, syzygyAmbient, PrintLevel => o.PrintLevel);
     
     -- put result back into the tensorRing 
     if numcols subducted != 0 then (
@@ -367,7 +419,11 @@ sagbi(SAGBIBasis) := o -> S -> (
     
     -----------------
     --OLD:
-    -- subducted = internalSubduction(compTable#"presentation", syzygyPairs); 
+    -- subducted = internalSubduction(compTable#"presentation", syzygyPairs);
+    
+    --  print out old subduction result
+    --print("Old Subduction result:");
+    --print(internalSubduction(compTable#"presentation", syzygyPairs));
     ----------------
     
         if numcols subducted != 0 then (
@@ -392,8 +448,8 @@ sagbi(SAGBIBasis) := o -> S -> (
 
 	if numcols newElements > 0 then (
 	    
-	    if o.PrintLevel > 0 then(
-	         print("-- New Elements");
+	    if o.PrintLevel > 2 then(
+	         print("-- New Elements to be processed");
 	         print(newElements);
 	         );
 	     
