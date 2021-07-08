@@ -11,6 +11,8 @@ export {
     "sagbiDone",
     "internalSubduction",
     "topLevelSubduction",
+    "topLevelAutoSubduce",
+    "topLevelFullSubduction",
     "subduction",
     "subalgebraBasis",
     "sagbi",

@@ -197,6 +197,26 @@ autosubduce(Matrix) := G -> (
     );
 
 
+
+-- AutoSubduction using topLevelSubduction
+topLevelAutoSubduce = method(TypicalValue => Matrix, Options => {PrintLevel => 0})
+topLevelAutoSubduce(Matrix) := o -> G -> (
+    noDupes := new MutableList from first entries G;        
+    reducedGens := for i from 0 to (numcols G)-1 list(		
+    	s := G_(0,i);
+    	notS := compress submatrix'(matrix({toList noDupes}),,{i});
+	if zero notS then return matrix{{s}};	
+	answer := topLevelFullSubduction(first entries notS, s, o);
+    	if(answer != 0) then ( 
+	    answer = answer*(1/leadCoef(answer));
+	    );
+    	noDupes#i = answer;	
+    	answer
+    	);
+        compress matrix{reducedGens}
+    );
+
+
 -- This is subroutine 11.18 of Sturmfels.
 -- Assumes M is a matrix of monomials in the toric ring K[A]
 -- (for now,  it can be anything in the tensor ring of subR satisfying this condition,

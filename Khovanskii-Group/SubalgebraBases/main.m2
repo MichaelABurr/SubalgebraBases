@@ -204,6 +204,71 @@ topLevelSubduction(List, Matrix) := o -> (G, M) -> (
     );
 
 
+--------------------------
+-- topLevelFullSubduction
+--   applies topLevelSubduction iteratively to a quotient ring element
+--------------------------
+-- Given a list G and an element f of a quotient ring Q = R/I
+--
+
+topLevelFullSubduction = method(TypicalValue => RingElement, Options => {PrintLevel => 0})
+topLevelFullSubduction(List, RingElement) := o -> (G, f) -> (
+    Q := ring f;    
+    I := ideal Q;
+    R := ring I;
+    quotientMap := map(Q, R, gens Q);
+    result := 0_Q;
+    g := f;
+    
+    if o.PrintLevel > 3 then (
+	print("-- topLevelFullSubduction");
+	print("-- G = ");
+	print(G);
+	print("-- f = ");
+	print(f);
+	);
+    
+    while true do (
+	
+	if o.PrintLevel > 4 then (
+	    print("topLevelFullSubduction loop");
+	    print("result so far =");
+	    print(result);
+	    print("g = ");
+	    print(g);
+	    );
+	
+	subductedPart := topLevelSubduction(G, g, o);
+	liftSubductedPart := sub(subductedPart, R) % I;
+	LTSubductedPart := quotientMap(leadTerm liftSubductedPart);
+	result = result + LTSubductedPart;
+	g = subductedPart - LTSubductedPart;
+	
+	-- exit the loop if g is a constant
+	if g == 0_Q then break;
+	if degree(g) == {0} then break;
+	);
+    
+    if o.PrintLevel > 3 then (
+    	print("exit topLevelFullSubduction loop");
+	print("result =");
+	print(result);
+	print("g = ");
+	print(g);
+	print("finished topLevelFullSubduction");
+	);
+    
+    result
+    );
+
+
+topLevelFullSubduction(List, Matrix) := o -> (G, M) -> (	
+    ents := for i from 0 to (numcols M)-1 list(
+    	topLevelFullSubduction(G, M_(0,i), o)
+	);
+    matrix({ents})
+    );
+
 
 ---------------------------------------------------------------------------------------
 -- subalgebraBasis is needed for legacy purposes. It should not be changed or deleted. 
@@ -267,24 +332,34 @@ sagbi(SAGBIBasis) := o -> S -> (
     
     
     ------------------------
-    -- ignore autosubduce
+    -- Change to autosubduce
     --
     -- note: autosubduce calls internalSubduction
-    --       for testing topLevelSubduction this next part
-    --       is temporarily commented out
+    --       use topLevelAutoSubduce for this now
+    --
     -----------------------
     
-    -*
     --TEMPORARY
     
     if o.Autosubduce then(
 	if o.PrintLevel > 0 then (
 	    print("Performing initial autosubduction...");
 	    );
-    	compTable#"subringGenerators" = autosubduce compTable#"subringGenerators";
+	
+	-- New autosubduce code using internal subduction:
+	compTable#"subringGenerators" = topLevelAutoSubduce(compTable#"subringGenerators", PrintLevel => o.PrintLevel);
+	
+	-- Previous autosubduce routine:
+    	-- compTable#"subringGenerators" = autosubduce compTable#"subringGenerators";
+	
+	if o.PrintLevel > 2 then (
+	    print("-- autoSubduced generators = ");
+	    print(compTable#"subringGenerators");
+	    );
+	
     );
     
-    *-
+    ----------------
     
     if (numcols compTable#"sagbiGenerators" == 0) or (not o.storePending) then (
     	insertPending(compTable, compTable#"subringGenerators");
@@ -409,7 +484,7 @@ sagbi(SAGBIBasis) := o -> S -> (
 	print(G);
 	);
     
-    subducted = topLevelSubduction(G, syzygyAmbient, PrintLevel => o.PrintLevel);
+    subducted = topLevelFullSubduction(G, syzygyAmbient, PrintLevel => o.PrintLevel);
     
     -- put result back into the tensorRing 
     if numcols subducted != 0 then (

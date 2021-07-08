@@ -42,13 +42,6 @@ submatBelowDegree = (inputMatrix,maxDegree) -> (
     inputMatrix_selectedCols
     )
 
---Accepts a 1-row matrix inputMatrix and returns a matrix of columns of inputMatrix whose entries all have total degree less than or equal to maxDegree
-submatAtMostDegree = (inputMatrix,maxDegree) -> (
-    selectedCols := positions(0..numcols inputMatrix - 1,
-        i -> (degrees source inputMatrix)_i <= {maxDegree});
-    inputMatrix_selectedCols
-    )
-
 
 --Accepts a 1-row matrix inputMatrix and returns a matrix of columns of inputMatrix where the highest degree entry has total degree equal to currDegree
 submatByDegree = (inputMatrix, currDegree) -> (
