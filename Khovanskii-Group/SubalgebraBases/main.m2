@@ -533,7 +533,7 @@ sagbi(SAGBIBasis) := o -> S -> (
 	    
 	    -- if not lowestDegree(compTable) == infinity then 
             if not (tempDegree == infinity) then (  
-                 compTable#"stoppingData"#"degree" = tempDegree;
+                 compTable#"stoppingData"#"degree" = tempDegree + 1;
                  ) else (
                  compTable#"stoppingData"#"degree" = compTable#"stoppingData"#"degree" + 1;
 		 );
