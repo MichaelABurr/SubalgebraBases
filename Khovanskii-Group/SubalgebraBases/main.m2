@@ -11,9 +11,13 @@ subduction(Matrix, RingElement) := (M, f) -> (
     result := pres#"fullSubstitution" internalSubduction(pres, f);
     result
     *-
+    Q := ring M;
+    R := ambient Q;
     
-    G := flatten entries M;
-    result := topLevelSubduction(G, f);
+    pres := makePresRing(Q, M);
+    liftedPres := makePresRing(R, sub(M, R));
+        
+    result := topLevelFullSubduction(pres, liftedPres, f);
     result 
     
     );
@@ -28,9 +32,14 @@ subduction(Matrix, Matrix) := (M, N) -> (
     matrix({ents})
     *-
     
-    G := flatten entries M;
+    Q := ring M;
+    R := ambient Q;
+    
+    pres := makePresRing(Q, M);
+    liftedPres := makePresRing(R, sub(M, R));
+    
     ents := for i from 0 to (numcols N)-1 list (
-	topLevelSubduction(G, N_(0, i))
+	topLevelFullSubduction(pres, liftedPres, N_(0, i))
 	);
     matrix({ents})
     
@@ -98,6 +107,128 @@ topLevelSubduction = method(
 --  4+ = displays rings and ideals used in computation
 --  5+ = displays the polynomial g throughout the loop
 
+
+--------------------------------------------
+-- topLevelSubduction
+-- 
+-- Input:
+-- f polynomial in Q = R/I to be subducted
+-- P presRing with generators to subduct against
+-- S lifted presRing with the generators of S lifted to R
+--
+-- Output:
+-- g subduction of f wrt the generators of S 
+--------------------------------------------
+
+topLevelSubduction(PresRing, PresRing, RingElement) := o -> (P, S, f) -> (
+     
+    if o.PrintLevel > 2 then (
+    print("");
+    print("--------------------------------");
+    print("-- Call to topLevelSubduction");
+    print("--------------------------------");
+    print("-- PresRing P = ");
+    print(peek P);
+    print("");
+    print("-- Lifted PresRing S = ");
+    print(peek S);
+    );
+    
+    -- Setup rings, ideals and maps
+    Q := ring f;
+    I := ideal Q;
+    R := ring I;
+    quotientMap := map(Q, R, gens Q);
+    LTI := ideal leadTerm I; 
+    
+    generatorIndices := toList(numgens R .. (numgens P#"tensorRing" - 1));
+    G := (matrix P#"fullSubstitution")_generatorIndices;
+    liftG := (matrix S#"fullSubstitution")_generatorIndices;
+    
+    if o.PrintLevel > 3 then (
+    print("-- Ambient Ring Q = ");
+    print(Q);
+    print("");
+    print("-- Ideal I = ");
+    print(I);
+    print("");
+    print("-- PolyRing R = ");
+    print(R);
+    print("");
+    print("-- LeadTerm I LTI = ");
+    print(LTI);
+    print("");
+    );
+    
+    
+    -- We work with a subring S of R and, when necessary, take elements mod LT(I)
+    syzygyIdeal := S#"syzygyIdeal";
+    inclusionAmbient := S#"inclusionAmbient";
+    projectionAmbient := S#"projectionAmbient";
+    fullSubstitution := S#"fullSubstitution";
+    sagbiInclusion := S#"sagbiInclusion";
+    
+    -- lift LT(I) to the tensorRing
+    tensorRingLTI := inclusionAmbient LTI;
+    g := f;
+    
+    while true do (
+	
+	if o.PrintLevel > 4 then (
+	    print("-- Current g = ");
+	    print(g);
+	    );
+	
+	-- if g is a constant then exit loop
+	if g == 0_Q then break;
+	if degree(g) == {0} then break;
+		
+	liftg := sub(g, R) % I;
+	LTg := (leadTerm liftg) % LTI; 
+	tensorRingLTg := inclusionAmbient(LTg);
+	h := tensorRingLTg % (syzygyIdeal + tensorRingLTI);
+	
+	projectionh := fullSubstitution sagbiInclusion h;
+	-- exit the loop if h does not lie in K[p_1 .. p_r] <- the variables tagging the generators of S
+	if projectionh == 0_R then break;
+	if degree projectionh == {0} then break;
+	
+	-- update g
+	hSub := quotientMap fullSubstitution h;
+	g = g - hSub;
+	);
+    
+    -- if g is a constant subduct to 0_Q
+    if g != 0_Q then (
+	if degree(g) == {0} then g = 0_Q;
+	);
+    if o.PrintLevel > 2 then (
+    print("-- output = ");
+    print(g);
+    print("---------------------------------------");
+    print("-- End of call to topLevelSubduction");
+    print("---------------------------------------");
+    print("");
+    );
+    
+    g
+    );
+
+
+topLevelSubduction(PresRing, PresRing, Matrix) := o -> (P, S, M) -> (	
+    ents := for i from 0 to (numcols M)-1 list(
+    	topLevelSubduction(P, S, M_(0,i), o)
+	);
+    matrix({ents})
+    );
+
+-*
+---------------------------------------
+-- Old version of topLevelSubduction
+-- 
+--
+---------------------------------------
+
 topLevelSubduction(List, RingElement) := o -> (G, f) -> (
      
     if o.PrintLevel > 2 then (
@@ -112,13 +243,13 @@ topLevelSubduction(List, RingElement) := o -> (G, f) -> (
     print(f);
     );
     
-    
     -- Setup rings, ideals and maps
     Q := ring f;
     I := ideal Q;
     R := ring I;
     quotientMap := map(Q, R, gens Q);
     LTI := ideal leadTerm I; 
+    
     liftG := for g in G list sub(g, R) % I; -- lift G to R 
     
     if o.PrintLevel > 3 then (
@@ -143,6 +274,7 @@ topLevelSubduction(List, RingElement) := o -> (G, f) -> (
     -- change the input to accept a presentation + ring element 
     -- and we output something in the tensorRing
     --------
+    
     S := subring liftG; 
     syzygyIdeal := S#"presentation"#"syzygyIdeal";
     inclusionAmbient := S#"presentation"#"inclusionAmbient";
@@ -196,12 +328,17 @@ topLevelSubduction(List, RingElement) := o -> (G, f) -> (
     g
     );
 
+
 topLevelSubduction(List, Matrix) := o -> (G, M) -> (	
     ents := for i from 0 to (numcols M)-1 list(
     	topLevelSubduction(G, M_(0,i), o)
 	);
     matrix({ents})
     );
+
+-------------------------------------------
+*-
+
 
 
 --------------------------
@@ -210,6 +347,80 @@ topLevelSubduction(List, Matrix) := o -> (G, M) -> (
 --------------------------
 -- Given a list G and an element f of a quotient ring Q = R/I
 --
+
+
+
+
+topLevelFullSubduction = method(TypicalValue => RingElement, Options => {PrintLevel => 0})
+topLevelFullSubduction(PresRing, PresRing, RingElement) := o -> (P, S, f) -> (
+    Q := ring f;    
+    I := ideal Q;
+    R := ring I;
+    quotientMap := map(Q, R, gens Q);
+    result := 0_Q;
+    g := f;
+    
+    if o.PrintLevel > 3 then (
+	print("----------------------------");
+	print("-- topLevelFullSubduction");
+	print("----------------------------");
+	print("-- P = ");
+	print(peek P);
+	print("-- S = ");
+	print(peek S);
+	print("-- f = ");
+	print(f);
+	);
+    
+    while true do (
+	
+	if o.PrintLevel > 4 then (
+	    print("topLevelFullSubduction loop");
+	    print("result so far =");
+	    print(result);
+	    print("g = ");
+	    print(g);
+	    );
+	
+	subductedPart := topLevelSubduction(P, S, g, o);
+	liftSubductedPart := sub(subductedPart, R) % I;
+	LTSubductedPart := quotientMap(leadTerm liftSubductedPart);
+	result = result + LTSubductedPart;
+	g = subductedPart - LTSubductedPart;
+	
+	-- exit the loop if g is zero or a constant
+	if g == 0_Q then break;
+	if degree(g) == {0} then break;
+	);
+    
+    if o.PrintLevel > 3 then (
+    	print("exit topLevelFullSubduction loop");
+	print("result =");
+	print(result);
+	print("g = ");
+	print(g);
+	print("finished topLevelFullSubduction");
+	print("--------------------------------")
+	);
+    
+    result
+    );
+
+
+topLevelFullSubduction(PresRing, PresRing, Matrix) := o -> (P, S, M) -> (	
+    ents := for i from 0 to (numcols M)-1 list(
+    	topLevelFullSubduction(P, S, M_(0,i), o)
+	);
+    matrix({ents})
+    );
+
+
+-* 
+-------------------------------------------
+-- Old version of topLevelFullSubduction
+--
+-- current version uses pres rings
+-------------------------------------------
 
 topLevelFullSubduction = method(TypicalValue => RingElement, Options => {PrintLevel => 0})
 topLevelFullSubduction(List, RingElement) := o -> (G, f) -> (
@@ -268,6 +479,7 @@ topLevelFullSubduction(List, Matrix) := o -> (G, M) -> (
 	);
     matrix({ents})
     );
+*-
 
 
 ---------------------------------------------------------------------------------------
@@ -346,7 +558,7 @@ sagbi(SAGBIBasis) := o -> S -> (
 	    print("Performing initial autosubduction...");
 	    );
 	
-	-- New autosubduce code using internal subduction:
+	-- New autosubduce code using top level subduction:
 	compTable#"subringGenerators" = topLevelAutoSubduce(compTable#"subringGenerators", PrintLevel => o.PrintLevel);
 	
 	-- Previous autosubduce routine:
@@ -400,7 +612,7 @@ sagbi(SAGBIBasis) := o -> S -> (
 	terminationCondition1 = rawStatus1 raw sagbiGB == 6;
 	zeroGens = submatByDegree(mingens ideal selectInSubring(1, gens sagbiGB), compTable#"stoppingData"#"degree");
 	
-	-- THIS IS NOT CORRECT IN THE (x^2 - y) EXAMPLE
+	-- THIS IS NOT CORRECT IN THE (x^2 - y) QUOTIENT EXAMPLE
 	syzygyPairs = compTable#"presentation"#"substitution"(zeroGens);
     	
 	
@@ -484,7 +696,10 @@ sagbi(SAGBIBasis) := o -> S -> (
 	print(G);
 	);
     
-    subducted = topLevelFullSubduction(G, syzygyAmbient, PrintLevel => o.PrintLevel);
+    
+    presForSubduction := compTable#"presentation";
+    liftedPresForSubduction := compTable#"liftedPresentation";
+    subducted = topLevelFullSubduction(presForSubduction, liftedPresForSubduction, syzygyAmbient, PrintLevel => o.PrintLevel);
     
     -- put result back into the tensorRing 
     if numcols subducted != 0 then (

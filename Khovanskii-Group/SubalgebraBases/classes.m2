@@ -57,9 +57,11 @@ sagbiBasis Subring := opts -> S -> (
         "sagbiDone" => false,
         "stoppingData" => stopping,
         "pending" => pending,
-        "presentation" => null
+        "presentation" => null,
+	"liftedPresentation" => null
     }
 )
+
 
 sagbiBasis MutableHashTable :=  opts -> H -> (
     stopping := new HashTable from {"limit" => H#"stoppingData"#"limit", "degree" => H#"stoppingData"#"degree"};
@@ -72,9 +74,18 @@ sagbiBasis MutableHashTable :=  opts -> H -> (
         "sagbiDone" => H#"sagbiDone",
         "stoppingData" => stopping,
         "pending" => pending,
-        "presentation" => makePresRing(VarBaseName => opts.VarBaseName, H#"ambientRing", H#"sagbiGenerators")
+        "presentation" => makePresRing(VarBaseName => opts.VarBaseName, H#"ambientRing", H#"sagbiGenerators"),
+	"liftedPresentation" => if isQuotientRing H#"ambientRing" then (
+	    R := ambient H#"ambientRing";
+	    liftedSagbiGenerators := sub(H#"sagbiGenerators", R);
+	    makePresRing(VarBaseName => opts.VarBaseName, R, liftedSagbiGenerators)
+	    ) else (
+	    makePresRing(VarBaseName => opts.VarBaseName, H#"ambientRing", H#"sagbiGenerators")
+	    )
     }
 )
+
+
 
 gens SAGBIBasis := o -> S -> (
     if #flatten entries S#"sagbiGenerators" == 0 then S#"subringGenerators"

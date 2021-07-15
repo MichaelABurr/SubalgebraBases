@@ -76,7 +76,15 @@ processPending = (compTable) -> (
             remove(compTable#"pending", currentLowest);
 	    );
     	);
-    compTable#"presentation" = makePresRing(compTable#"ambientRing", compTable#"sagbiGenerators");
+    
+    Q := compTable#"ambientRing";
+    R := ambient Q;
+    sagbiGens := compTable#"sagbiGenerators";
+    liftedSagbiGens := sub(sagbiGens, R);
+    
+    compTable#"presentation" = makePresRing(Q, sagbiGens);
+    compTable#"liftedPresentation" = makePresRing(R, liftedSagbiGens);
+        
     currentLowest
     )
 

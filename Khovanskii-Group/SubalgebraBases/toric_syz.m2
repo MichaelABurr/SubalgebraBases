@@ -206,8 +206,15 @@ topLevelAutoSubduce(Matrix) := o -> G -> (
     	s := G_(0,i);
     	notS := compress submatrix'(matrix({toList noDupes}),,{i});
 	if zero notS then return matrix{{s}};	
-	answer := topLevelFullSubduction(first entries notS, s, o);
-    	if(answer != 0) then ( 
+	
+	Q := ring notS;
+	R := ambient Q;
+	liftedNotS := sub(notS, R);
+	presNotS := makePresRing(Q, notS);
+    	liftedPresNotS := makePresRing(R, liftedNotS);
+	answer := topLevelFullSubduction(presNotS, liftedPresNotS, s, o);
+    	
+	if(answer != 0) then ( 
 	    answer = answer*(1/leadCoef(answer));
 	    );
     	noDupes#i = answer;	
